@@ -1,0 +1,7 @@
+# ninja log v5
+378	521	1680454430848763165	egyptianLandmarks	f9ae663c20ec51a8
+0	377	1680454430704761085	CMakeFiles/egyptianLandmarks.dir/main.cpp.o	319b35a7f5d00720
+0	235	1680455791373372743	glad/CMakeFiles/glad.dir/src/glad.c.o	bf32ceda4a7947ec
+236	250	1680455791385372972	glad/libglad.a	b6059781ee386448
+0	366	1680455791501375194	CMakeFiles/egyptianLandmarks.dir/main.cpp.o	145864b8cfb88fce
+367	487	1680455791621377492	egyptianLandmarks	b1ac865e7276079b

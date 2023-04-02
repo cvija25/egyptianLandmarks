@@ -1,0 +1,6 @@
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/CMakeFiles/egyptianLandmarks.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/glad/CMakeFiles/glad.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/glad/CMakeFiles/edit_cache.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/glad/CMakeFiles/rebuild_cache.dir
