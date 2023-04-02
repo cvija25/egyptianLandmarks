@@ -1,13 +1,9 @@
 # ninja log v5
-277	398	1680456642413835270	egyptianLandmarks	f9ae663c20ec51a8
-0	276	1680456642293836411	CMakeFiles/egyptianLandmarks.dir/main.cpp.o	319b35a7f5d00720
-1	140	1680456783033258435	glad/CMakeFiles/glad.dir/src/glad.c.o	bf32ceda4a7947ec
 140	151	1680456783045258440	glad/libglad.a	b6059781ee386448
-1	331	1680456783221258516	CMakeFiles/egyptianLandmarks.dir/main.cpp.o	46ae4a37b6566e56
-331	444	1680456783333258564	egyptianLandmarks	b1ac865e7276079b
-0	492	1680460515837078947	CMakeFiles/egyptianLandmarks.dir/main.cpp.o	46ae4a37b6566e56
-492	625	1680460515969081759	egyptianLandmarks	b1ac865e7276079b
-1	323	1680460594502736437	CMakeFiles/egyptianLandmarks.dir/main.cpp.o	46ae4a37b6566e56
-323	443	1680460594622738939	egyptianLandmarks	b1ac865e7276079b
-0	303	1680460643187745287	CMakeFiles/egyptianLandmarks.dir/main.cpp.o	46ae4a37b6566e56
 303	419	1680460643299747594	egyptianLandmarks	b1ac865e7276079b
+1	140	1680456783033258435	glad/CMakeFiles/glad.dir/src/glad.c.o	bf32ceda4a7947ec
+0	303	1680460643187745287	CMakeFiles/egyptianLandmarks.dir/main.cpp.o	46ae4a37b6566e56
+0	531	1680463701829195244	CMakeFiles/egyptianLandmarks.dir/main.cpp.o	46ae4a37b6566e56
+531	673	1680463701969197913	egyptianLandmarks	b1ac865e7276079b
+1	392	1680463865287508396	CMakeFiles/egyptianLandmarks.dir/main.cpp.o	46ae4a37b6566e56
+393	491	1680463865387509588	egyptianLandmarks	b1ac865e7276079b
