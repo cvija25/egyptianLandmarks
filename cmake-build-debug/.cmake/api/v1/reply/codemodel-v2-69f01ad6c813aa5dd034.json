@@ -13,7 +13,7 @@
 					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
-						"string" : "3.23"
+						"string" : "3.24"
 					},
 					"projectIndex" : 0,
 					"source" : ".",
@@ -74,7 +74,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "egyptianLandmarks::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-egyptianLandmarks-Debug-e0764441a0b6f86afc2d.json",
+					"jsonFile" : "target-egyptianLandmarks-Debug-94fa6dafac26278531cb.json",
 					"name" : "egyptianLandmarks",
 					"projectIndex" : 0
 				},

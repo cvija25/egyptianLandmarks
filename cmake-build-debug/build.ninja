@@ -51,7 +51,7 @@ build cmake_object_order_depends_target_egyptianLandmarks: phony || cmake_object
 
 build CMakeFiles/egyptianLandmarks.dir/main.cpp.o: CXX_COMPILER__egyptianLandmarks_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/main.cpp || cmake_object_order_depends_target_egyptianLandmarks
   DEP_FILE = CMakeFiles/egyptianLandmarks.dir/main.cpp.o.d
-  FLAGS = -g -fdiagnostics-color=always -std=gnu++14
+  FLAGS = -g -fdiagnostics-color=always
   INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/glad/include
   OBJECT_DIR = CMakeFiles/egyptianLandmarks.dir
   OBJECT_FILE_DIR = CMakeFiles/egyptianLandmarks.dir

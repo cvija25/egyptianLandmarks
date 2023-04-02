@@ -246,33 +246,6 @@ OPENGL_opengl_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libOpenGL.so
 OPENGL_xmesa_INCLUDE_DIR:PATH=OPENGL_xmesa_INCLUDE_DIR-NOTFOUND
 
 //Value Computed by CMake
-Project_BINARY_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug
-
-//Value Computed by CMake
-Project_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-Project_SOURCE_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks
-
-//Value Computed by CMake
-eg_BINARY_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug
-
-//Value Computed by CMake
-eg_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-eg_SOURCE_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks
-
-//Value Computed by CMake
-egy_BINARY_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug
-
-//Value Computed by CMake
-egy_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-egy_SOURCE_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks
-
-//Value Computed by CMake
 egyptianLandmarks_BINARY_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug
 
 //Value Computed by CMake
@@ -280,15 +253,6 @@ egyptianLandmarks_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 egyptianLandmarks_SOURCE_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks
-
-//Value Computed by CMake
-egyt_BINARY_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug
-
-//Value Computed by CMake
-egyt_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-egyt_SOURCE_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks
 
 //The directory containing a CMake configuration file for glfw3.
 glfw3_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/glfw3
