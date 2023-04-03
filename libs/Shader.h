@@ -1,16 +1,15 @@
 //
 // Created by cvija on 2.4.23..
 //
+#ifndef EGYPTIANLANDMARKS_SHADER_H
+#define EGYPTIANLANDMARKS_SHADER_H
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
-
-#ifndef EGYPTIANLANDMARKS_SHADER_H
-#define EGYPTIANLANDMARKS_SHADER_H
 
 std::string readFileContents (std::string path) {
     std::ifstream in(path);
