@@ -41,20 +41,53 @@ include CMakeFiles/rules.ninja
 
 cmake_ninja_workdir = /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/
 # =============================================================================
+# Object build statements for STATIC_LIBRARY target STB_IMAGE
+
+
+#############################################
+# Order-only phony target for STB_IMAGE
+
+build cmake_object_order_depends_target_STB_IMAGE: phony || CMakeFiles/STB_IMAGE.dir
+
+build CMakeFiles/STB_IMAGE.dir/libs/stb_image.cpp.o: CXX_COMPILER__STB_IMAGE_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/libs/stb_image.cpp || cmake_object_order_depends_target_STB_IMAGE
+  DEP_FILE = CMakeFiles/STB_IMAGE.dir/libs/stb_image.cpp.o.d
+  FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g -fdiagnostics-color=always -std=gnu++14 -Wno-shift-negative-value -Wno-implicit-fallthrough
+  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/configuration -I/home/cvija/Documents/gitHub/egyptianLandmarks/include
+  OBJECT_DIR = CMakeFiles/STB_IMAGE.dir
+  OBJECT_FILE_DIR = CMakeFiles/STB_IMAGE.dir/libs
+
+
+# =============================================================================
+# Link build statements for STATIC_LIBRARY target STB_IMAGE
+
+
+#############################################
+# Link the static library libSTB_IMAGE.a
+
+build libSTB_IMAGE.a: CXX_STATIC_LIBRARY_LINKER__STB_IMAGE_Debug CMakeFiles/STB_IMAGE.dir/libs/stb_image.cpp.o
+  LANGUAGE_COMPILE_FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g
+  OBJECT_DIR = CMakeFiles/STB_IMAGE.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = libSTB_IMAGE.a
+  TARGET_PDB = STB_IMAGE.a.dbg
+
+# =============================================================================
 # Object build statements for EXECUTABLE target egyptianLandmarks
 
 
 #############################################
 # Order-only phony target for egyptianLandmarks
 
-build cmake_object_order_depends_target_egyptianLandmarks: phony || cmake_object_order_depends_target_glad
+build cmake_object_order_depends_target_egyptianLandmarks: phony || cmake_object_order_depends_target_STB_IMAGE cmake_object_order_depends_target_glad cmake_object_order_depends_target_imgui
 
-build CMakeFiles/egyptianLandmarks.dir/main.cpp.o: CXX_COMPILER__egyptianLandmarks_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/main.cpp || cmake_object_order_depends_target_egyptianLandmarks
-  DEP_FILE = CMakeFiles/egyptianLandmarks.dir/main.cpp.o.d
-  FLAGS = -g -fdiagnostics-color=always
-  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/glad/include
+build CMakeFiles/egyptianLandmarks.dir/src/main.cpp.o: CXX_COMPILER__egyptianLandmarks_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/src/main.cpp || cmake_object_order_depends_target_egyptianLandmarks
+  DEFINES = -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+  DEP_FILE = CMakeFiles/egyptianLandmarks.dir/src/main.cpp.o.d
+  FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g -fdiagnostics-color=always -std=gnu++14
+  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/configuration -I/home/cvija/Documents/gitHub/egyptianLandmarks/include -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/include -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/include
   OBJECT_DIR = CMakeFiles/egyptianLandmarks.dir
-  OBJECT_FILE_DIR = CMakeFiles/egyptianLandmarks.dir
+  OBJECT_FILE_DIR = CMakeFiles/egyptianLandmarks.dir/src
 
 
 # =============================================================================
@@ -62,15 +95,15 @@ build CMakeFiles/egyptianLandmarks.dir/main.cpp.o: CXX_COMPILER__egyptianLandmar
 
 
 #############################################
-# Link the executable egyptianLandmarks
+# Link the executable /home/cvija/Documents/gitHub/egyptianLandmarks/egyptianLandmarks
 
-build egyptianLandmarks: CXX_EXECUTABLE_LINKER__egyptianLandmarks_Debug CMakeFiles/egyptianLandmarks.dir/main.cpp.o | glad/libglad.a /usr/lib/x86_64-linux-gnu/libglfw.so.3.3 /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so || glad/libglad.a
-  FLAGS = -g
-  LINK_LIBRARIES = glad/libglad.a  /usr/lib/x86_64-linux-gnu/libglfw.so.3.3  -lpthread  -lX11  -lXrandr  -lXi  -ldl  /usr/lib/x86_64-linux-gnu/libGLX.so  /usr/lib/x86_64-linux-gnu/libOpenGL.so
+build /home/cvija/Documents/gitHub/egyptianLandmarks/egyptianLandmarks: CXX_EXECUTABLE_LINKER__egyptianLandmarks_Debug CMakeFiles/egyptianLandmarks.dir/src/main.cpp.o | libs/glad/libglad.a /usr/lib/x86_64-linux-gnu/libassimp.so libSTB_IMAGE.a libs/imgui/libimgui.a /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so libs/glad/libglad.a || libSTB_IMAGE.a libs/glad/libglad.a libs/imgui/libimgui.a
+  FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g
+  LINK_LIBRARIES = -lglfw  libs/glad/libglad.a  -lX11  -lXrandr  -lXinerama  -lXi  -lXxf86vm  -lXcursor  -ldl  -lpthread  -lfreetype  /usr/lib/x86_64-linux-gnu/libassimp.so  libSTB_IMAGE.a  libs/imgui/libimgui.a  /usr/lib/x86_64-linux-gnu/libGLX.so  /usr/lib/x86_64-linux-gnu/libOpenGL.so  libs/glad/libglad.a
   OBJECT_DIR = CMakeFiles/egyptianLandmarks.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_FILE = egyptianLandmarks
+  TARGET_FILE = /home/cvija/Documents/gitHub/egyptianLandmarks/egyptianLandmarks
   TARGET_PDB = egyptianLandmarks.dbg
 
 
@@ -108,14 +141,14 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 #############################################
 # Order-only phony target for glad
 
-build cmake_object_order_depends_target_glad: phony || glad/CMakeFiles/glad.dir
+build cmake_object_order_depends_target_glad: phony || libs/glad/CMakeFiles/glad.dir
 
-build glad/CMakeFiles/glad.dir/src/glad.c.o: C_COMPILER__glad_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/glad/src/glad.c || cmake_object_order_depends_target_glad
-  DEP_FILE = glad/CMakeFiles/glad.dir/src/glad.c.o.d
+build libs/glad/CMakeFiles/glad.dir/src/glad.c.o: C_COMPILER__glad_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/src/glad.c || cmake_object_order_depends_target_glad
+  DEP_FILE = libs/glad/CMakeFiles/glad.dir/src/glad.c.o.d
   FLAGS = -g -fdiagnostics-color=always
-  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/glad/include
-  OBJECT_DIR = glad/CMakeFiles/glad.dir
-  OBJECT_FILE_DIR = glad/CMakeFiles/glad.dir/src
+  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/include
+  OBJECT_DIR = libs/glad/CMakeFiles/glad.dir
+  OBJECT_FILE_DIR = libs/glad/CMakeFiles/glad.dir/src
 
 
 # =============================================================================
@@ -123,45 +156,162 @@ build glad/CMakeFiles/glad.dir/src/glad.c.o: C_COMPILER__glad_Debug /home/cvija/
 
 
 #############################################
-# Link the static library glad/libglad.a
+# Link the static library libs/glad/libglad.a
 
-build glad/libglad.a: C_STATIC_LIBRARY_LINKER__glad_Debug glad/CMakeFiles/glad.dir/src/glad.c.o
+build libs/glad/libglad.a: C_STATIC_LIBRARY_LINKER__glad_Debug libs/glad/CMakeFiles/glad.dir/src/glad.c.o
   LANGUAGE_COMPILE_FLAGS = -g
-  OBJECT_DIR = glad/CMakeFiles/glad.dir
+  OBJECT_DIR = libs/glad/CMakeFiles/glad.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_FILE = glad/libglad.a
+  TARGET_FILE = libs/glad/libglad.a
   TARGET_PDB = glad.a.dbg
 
 
 #############################################
 # Utility command for edit_cache
 
-build glad/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/glad && /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+build libs/glad/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/glad && /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
   DESC = No interactive CMake dialog available...
   restat = 1
 
-build glad/edit_cache: phony glad/CMakeFiles/edit_cache.util
+build libs/glad/edit_cache: phony libs/glad/CMakeFiles/edit_cache.util
 
 
 #############################################
 # Utility command for rebuild_cache
 
-build glad/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/glad && /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/bin/cmake --regenerate-during-build -S/home/cvija/Documents/gitHub/egyptianLandmarks -B/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug
+build libs/glad/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/glad && /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/bin/cmake --regenerate-during-build -S/home/cvija/Documents/gitHub/egyptianLandmarks -B/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
 
-build glad/rebuild_cache: phony glad/CMakeFiles/rebuild_cache.util
+build libs/glad/rebuild_cache: phony libs/glad/CMakeFiles/rebuild_cache.util
+
+# =============================================================================
+# Write statements declared in CMakeLists.txt:
+# /home/cvija/Documents/gitHub/egyptianLandmarks/CMakeLists.txt
+# =============================================================================
+
+# =============================================================================
+# Object build statements for STATIC_LIBRARY target imgui
+
+
+#############################################
+# Order-only phony target for imgui
+
+build cmake_object_order_depends_target_imgui: phony || cmake_object_order_depends_target_glad
+
+build libs/imgui/CMakeFiles/imgui.dir/src/imgui.cpp.o: CXX_COMPILER__imgui_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/src/imgui.cpp || cmake_object_order_depends_target_imgui
+  DEFINES = -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+  DEP_FILE = libs/imgui/CMakeFiles/imgui.dir/src/imgui.cpp.o.d
+  FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g -fdiagnostics-color=always -std=gnu++14
+  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/include -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/include
+  OBJECT_DIR = libs/imgui/CMakeFiles/imgui.dir
+  OBJECT_FILE_DIR = libs/imgui/CMakeFiles/imgui.dir/src
+
+build libs/imgui/CMakeFiles/imgui.dir/src/imgui_demo.cpp.o: CXX_COMPILER__imgui_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/src/imgui_demo.cpp || cmake_object_order_depends_target_imgui
+  DEFINES = -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+  DEP_FILE = libs/imgui/CMakeFiles/imgui.dir/src/imgui_demo.cpp.o.d
+  FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g -fdiagnostics-color=always -std=gnu++14
+  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/include -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/include
+  OBJECT_DIR = libs/imgui/CMakeFiles/imgui.dir
+  OBJECT_FILE_DIR = libs/imgui/CMakeFiles/imgui.dir/src
+
+build libs/imgui/CMakeFiles/imgui.dir/src/imgui_draw.cpp.o: CXX_COMPILER__imgui_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/src/imgui_draw.cpp || cmake_object_order_depends_target_imgui
+  DEFINES = -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+  DEP_FILE = libs/imgui/CMakeFiles/imgui.dir/src/imgui_draw.cpp.o.d
+  FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g -fdiagnostics-color=always -std=gnu++14
+  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/include -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/include
+  OBJECT_DIR = libs/imgui/CMakeFiles/imgui.dir
+  OBJECT_FILE_DIR = libs/imgui/CMakeFiles/imgui.dir/src
+
+build libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_glfw.cpp.o: CXX_COMPILER__imgui_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/src/imgui_impl_glfw.cpp || cmake_object_order_depends_target_imgui
+  DEFINES = -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+  DEP_FILE = libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_glfw.cpp.o.d
+  FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g -fdiagnostics-color=always -std=gnu++14
+  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/include -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/include
+  OBJECT_DIR = libs/imgui/CMakeFiles/imgui.dir
+  OBJECT_FILE_DIR = libs/imgui/CMakeFiles/imgui.dir/src
+
+build libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_opengl3.cpp.o: CXX_COMPILER__imgui_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/src/imgui_impl_opengl3.cpp || cmake_object_order_depends_target_imgui
+  DEFINES = -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+  DEP_FILE = libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_opengl3.cpp.o.d
+  FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g -fdiagnostics-color=always -std=gnu++14
+  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/include -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/include
+  OBJECT_DIR = libs/imgui/CMakeFiles/imgui.dir
+  OBJECT_FILE_DIR = libs/imgui/CMakeFiles/imgui.dir/src
+
+build libs/imgui/CMakeFiles/imgui.dir/src/imgui_tables.cpp.o: CXX_COMPILER__imgui_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/src/imgui_tables.cpp || cmake_object_order_depends_target_imgui
+  DEFINES = -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+  DEP_FILE = libs/imgui/CMakeFiles/imgui.dir/src/imgui_tables.cpp.o.d
+  FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g -fdiagnostics-color=always -std=gnu++14
+  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/include -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/include
+  OBJECT_DIR = libs/imgui/CMakeFiles/imgui.dir
+  OBJECT_FILE_DIR = libs/imgui/CMakeFiles/imgui.dir/src
+
+build libs/imgui/CMakeFiles/imgui.dir/src/imgui_widgets.cpp.o: CXX_COMPILER__imgui_Debug /home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/src/imgui_widgets.cpp || cmake_object_order_depends_target_imgui
+  DEFINES = -DIMGUI_IMPL_OPENGL_LOADER_GLAD
+  DEP_FILE = libs/imgui/CMakeFiles/imgui.dir/src/imgui_widgets.cpp.o.d
+  FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g -fdiagnostics-color=always -std=gnu++14
+  INCLUDES = -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/include -I/home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/include
+  OBJECT_DIR = libs/imgui/CMakeFiles/imgui.dir
+  OBJECT_FILE_DIR = libs/imgui/CMakeFiles/imgui.dir/src
+
+
+# =============================================================================
+# Link build statements for STATIC_LIBRARY target imgui
+
+
+#############################################
+# Link the static library libs/imgui/libimgui.a
+
+build libs/imgui/libimgui.a: CXX_STATIC_LIBRARY_LINKER__imgui_Debug libs/imgui/CMakeFiles/imgui.dir/src/imgui.cpp.o libs/imgui/CMakeFiles/imgui.dir/src/imgui_demo.cpp.o libs/imgui/CMakeFiles/imgui.dir/src/imgui_draw.cpp.o libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_glfw.cpp.o libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_opengl3.cpp.o libs/imgui/CMakeFiles/imgui.dir/src/imgui_tables.cpp.o libs/imgui/CMakeFiles/imgui.dir/src/imgui_widgets.cpp.o || libs/glad/libglad.a
+  LANGUAGE_COMPILE_FLAGS = -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -O3 -g
+  OBJECT_DIR = libs/imgui/CMakeFiles/imgui.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = libs/imgui/libimgui.a
+  TARGET_PDB = imgui.a.dbg
+
+
+#############################################
+# Utility command for edit_cache
+
+build libs/imgui/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/imgui && /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  DESC = No interactive CMake dialog available...
+  restat = 1
+
+build libs/imgui/edit_cache: phony libs/imgui/CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build libs/imgui/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/imgui && /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/bin/cmake --regenerate-during-build -S/home/cvija/Documents/gitHub/egyptianLandmarks -B/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build libs/imgui/rebuild_cache: phony libs/imgui/CMakeFiles/rebuild_cache.util
 
 # =============================================================================
 # Target aliases.
 
-build glad: phony glad/libglad.a
+build STB_IMAGE: phony libSTB_IMAGE.a
 
-build libglad.a: phony glad/libglad.a
+build egyptianLandmarks: phony /home/cvija/Documents/gitHub/egyptianLandmarks/egyptianLandmarks
+
+build glad: phony libs/glad/libglad.a
+
+build imgui: phony libs/imgui/libimgui.a
+
+build libglad.a: phony libs/glad/libglad.a
+
+build libimgui.a: phony libs/imgui/libimgui.a
 
 # =============================================================================
 # Folder targets.
@@ -171,14 +321,21 @@ build libglad.a: phony glad/libglad.a
 #############################################
 # Folder: /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug
 
-build all: phony egyptianLandmarks glad/all
+build all: phony libSTB_IMAGE.a /home/cvija/Documents/gitHub/egyptianLandmarks/egyptianLandmarks libs/glad/all libs/imgui/all
 
 # =============================================================================
 
 #############################################
-# Folder: /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/glad
+# Folder: /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/glad
 
-build glad/all: phony glad/libglad.a
+build libs/glad/all: phony libs/glad/libglad.a
+
+# =============================================================================
+
+#############################################
+# Folder: /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/imgui
+
+build libs/imgui/all: phony libs/imgui/libimgui.a
 
 # =============================================================================
 # Built-in targets
@@ -187,14 +344,14 @@ build glad/all: phony glad/libglad.a
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCXXInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCommonLanguageInclude.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeGenericSystem.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeInitializeConfigs.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeLanguageInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeSystemSpecificInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeSystemSpecificInitialize.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/CMakeCommonCompilerMacros.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU-C.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU-CXX.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindOpenGL.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindPackageHandleStandardArgs.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindPackageMessage.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU-C.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU-CXX.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/UnixPaths.cmake /home/cvija/Documents/gitHub/egyptianLandmarks/CMakeLists.txt /home/cvija/Documents/gitHub/egyptianLandmarks/glad/CMakeLists.txt /usr/lib/x86_64-linux-gnu/cmake/glfw3/glfw3Config.cmake /usr/lib/x86_64-linux-gnu/cmake/glfw3/glfw3ConfigVersion.cmake /usr/lib/x86_64-linux-gnu/cmake/glfw3/glfw3Targets-none.cmake /usr/lib/x86_64-linux-gnu/cmake/glfw3/glfw3Targets.cmake CMakeCache.txt CMakeFiles/3.24.2/CMakeCCompiler.cmake CMakeFiles/3.24.2/CMakeCXXCompiler.cmake CMakeFiles/3.24.2/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCXXInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCommonLanguageInclude.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeGenericSystem.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeInitializeConfigs.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeLanguageInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeSystemSpecificInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeSystemSpecificInitialize.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/CMakeCommonCompilerMacros.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU-C.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU-CXX.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindOpenGL.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindPackageHandleStandardArgs.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindPackageMessage.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU-C.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU-CXX.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/UnixPaths.cmake /home/cvija/Documents/gitHub/egyptianLandmarks/CMakeLists.txt /home/cvija/Documents/gitHub/egyptianLandmarks/cmake/modules/FindASSIMP.cmake /home/cvija/Documents/gitHub/egyptianLandmarks/cmake/modules/FindGLFW3.cmake /home/cvija/Documents/gitHub/egyptianLandmarks/configuration/root_directory.h.in /home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/CMakeLists.txt /home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/CMakeLists.txt CMakeCache.txt CMakeFiles/3.24.2/CMakeCCompiler.cmake CMakeFiles/3.24.2/CMakeCXXCompiler.cmake CMakeFiles/3.24.2/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCXXInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCommonLanguageInclude.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeGenericSystem.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeInitializeConfigs.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeLanguageInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeSystemSpecificInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeSystemSpecificInitialize.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/CMakeCommonCompilerMacros.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU-C.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU-CXX.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindOpenGL.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindPackageHandleStandardArgs.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindPackageMessage.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU-C.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU-CXX.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/UnixPaths.cmake /home/cvija/Documents/gitHub/egyptianLandmarks/CMakeLists.txt /home/cvija/Documents/gitHub/egyptianLandmarks/glad/CMakeLists.txt /usr/lib/x86_64-linux-gnu/cmake/glfw3/glfw3Config.cmake /usr/lib/x86_64-linux-gnu/cmake/glfw3/glfw3ConfigVersion.cmake /usr/lib/x86_64-linux-gnu/cmake/glfw3/glfw3Targets-none.cmake /usr/lib/x86_64-linux-gnu/cmake/glfw3/glfw3Targets.cmake CMakeCache.txt CMakeFiles/3.24.2/CMakeCCompiler.cmake CMakeFiles/3.24.2/CMakeCXXCompiler.cmake CMakeFiles/3.24.2/CMakeSystem.cmake: phony
+build /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCXXInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeCommonLanguageInclude.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeGenericSystem.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeInitializeConfigs.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeLanguageInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeSystemSpecificInformation.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/CMakeSystemSpecificInitialize.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/CMakeCommonCompilerMacros.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU-C.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU-CXX.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Compiler/GNU.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindOpenGL.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindPackageHandleStandardArgs.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/FindPackageMessage.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU-C.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU-CXX.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux-GNU.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/Linux.cmake /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/share/cmake-3.24/Modules/Platform/UnixPaths.cmake /home/cvija/Documents/gitHub/egyptianLandmarks/CMakeLists.txt /home/cvija/Documents/gitHub/egyptianLandmarks/cmake/modules/FindASSIMP.cmake /home/cvija/Documents/gitHub/egyptianLandmarks/cmake/modules/FindGLFW3.cmake /home/cvija/Documents/gitHub/egyptianLandmarks/configuration/root_directory.h.in /home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad/CMakeLists.txt /home/cvija/Documents/gitHub/egyptianLandmarks/libs/imgui/CMakeLists.txt CMakeCache.txt CMakeFiles/3.24.2/CMakeCCompiler.cmake CMakeFiles/3.24.2/CMakeCXXCompiler.cmake CMakeFiles/3.24.2/CMakeSystem.cmake: phony
 
 
 #############################################

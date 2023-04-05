@@ -1,6 +1,10 @@
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/CMakeFiles/STB_IMAGE.dir
 /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/CMakeFiles/egyptianLandmarks.dir
 /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/CMakeFiles/edit_cache.dir
 /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/glad/CMakeFiles/glad.dir
-/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/glad/CMakeFiles/edit_cache.dir
-/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/glad/CMakeFiles/rebuild_cache.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/glad/CMakeFiles/glad.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/glad/CMakeFiles/edit_cache.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/glad/CMakeFiles/rebuild_cache.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/imgui/CMakeFiles/imgui.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/imgui/CMakeFiles/edit_cache.dir
+/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/imgui/CMakeFiles/rebuild_cache.dir

@@ -1,4 +1,5 @@
 /home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/cvija/Documents/CLion-2022.3.2/clion-2022.3.2/bin/ninja/linux/x64/ninja -G Ninja -S /home/cvija/Documents/gitHub/egyptianLandmarks -B /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug
+-- Found ASSIMP: /usr/lib/x86_64-linux-gnu/libassimp.so
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug

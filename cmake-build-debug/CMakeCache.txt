@@ -14,6 +14,12 @@
 # EXTERNAL cache entries
 ########################
 
+//Path to a file.
+ASSIMP_INCLUDE_DIR:PATH=/usr/include
+
+//Path to a library.
+ASSIMP_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libassimp.so
+
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line
 
@@ -212,14 +218,20 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Path to a file.
+GLFW3_INCLUDE_DIR:PATH=/usr/include
+
+//Path to a library.
+GLFW3_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libglfw.so
+
 //Value Computed by CMake
-Glad_BINARY_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/glad
+Glad_BINARY_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks/cmake-build-debug/libs/glad
 
 //Value Computed by CMake
 Glad_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
-Glad_SOURCE_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks/glad
+Glad_SOURCE_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmarks/libs/glad
 
 //Path to a file.
 OPENGL_EGL_INCLUDE_DIR:PATH=/usr/include
@@ -256,6 +268,9 @@ egyptianLandmarks_SOURCE_DIR:STATIC=/home/cvija/Documents/gitHub/egyptianLandmar
 
 //The directory containing a CMake configuration file for glfw3.
 glfw3_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/glfw3
+
+//Dependencies for the target
+imgui_LIB_DEPENDS:STATIC=general;glad;
 
 
 ########################
@@ -358,7 +373,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=2
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=3
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -401,6 +416,8 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//Details about finding GLFW3
+FIND_PACKAGE_MESSAGE_DETAILS_GLFW3:INTERNAL=[/usr/lib/x86_64-linux-gnu/libglfw.so][/usr/include][v()]
 //Details about finding OpenGL
 FIND_PACKAGE_MESSAGE_DETAILS_OpenGL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libOpenGL.so][/usr/lib/x86_64-linux-gnu/libGLX.so][/usr/include][c ][v()]
 //ADVANCED property for variable: OPENGL_EGL_INCLUDE_DIR

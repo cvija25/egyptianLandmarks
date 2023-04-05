@@ -4,12 +4,12 @@ illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-map_Kd 金字塔.jpg
+map_Kd trouglovi.jpg
 Ni 1.00
 newmtl lambert4SG
 illum 4
 Kd 0.00 0.00 0.00
 Ka 0.00 0.00 0.00
 Tf 1.00 1.00 1.00
-map_Kd 金字塔大门.jpg
+map_Kd kvadrati.jpg
 Ni 1.00
