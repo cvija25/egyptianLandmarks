@@ -33,7 +33,20 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-bool mouseEnable = true;
+bool mouseEnable = false;
+bool mouseEnablePressed = false;
+
+struct PointLight {
+    glm::vec3 position;
+
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
 
 int main()
 {
@@ -90,6 +103,21 @@ int main()
     Model temple3("resources/objects/temple3/temple3.obj");
     Model obelisk("resources/objects/ObeliskPiramide/Obelisk+mini pyramids.obj");
 
+    pyramids.SetShaderTextureNamePrefix("material.");
+    temple1.SetShaderTextureNamePrefix("material.");
+    temple2.SetShaderTextureNamePrefix("material.");
+    temple3.SetShaderTextureNamePrefix("material.");
+    obelisk.SetShaderTextureNamePrefix("material.");
+
+    PointLight pointLight;
+    pointLight.ambient = glm::vec3(0.4, 0.4, 0.2);
+    pointLight.diffuse = glm::vec3(0.6, 0.5, 0.6);
+    pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
+    pointLight.constant = 1.0f;
+    pointLight.linear = 0.0f;
+    pointLight.quadratic = 0.0f;
+    pointLight.position = glm::vec3(4.0, 4.0, 4.0);
+
     glm::vec3 modelPosition [] = {
             glm::vec3(0.0f, -0.5f, 10.0f),glm::vec3(15.0f, -0.5f, 10.0f), glm::vec3(-15.0f, -0.5f, 10.0f),
             glm::vec3(0.0f, -0.5f, 15.0f), glm::vec3(7.0f, -0.4f, 10.0f)
@@ -119,7 +147,7 @@ int main()
     glBindVertexArray(0);
 
     // load texture
-    unsigned int floorTexture = loadTexture("resources/textures/pod.jpg");
+    unsigned int floorTexture = loadTexture("resources/textures/sand.jpg");
 
     // shader configuration
     // --------------------
@@ -167,6 +195,19 @@ int main()
         glBindVertexArray(0);
 
         forModel.use();
+
+        float time = glfwGetTime();
+
+        pointLight.position = glm::vec3(0.0f, 10.0f, 0.0f);
+        forModel.setVec3("pointLight.position", pointLight.position);
+        forModel.setVec3("pointLight.ambient", pointLight.ambient);
+        forModel.setVec3("pointLight.diffuse", pointLight.diffuse);
+        forModel.setVec3("pointLight.specular", pointLight.specular);
+        forModel.setFloat("pointLight.constant", pointLight.constant);
+        forModel.setFloat("pointLight.linear", pointLight.linear);
+        forModel.setFloat("pointLight.quadratic", pointLight.quadratic);
+        forModel.setVec3("viewPosition", camera.Position);
+        forModel.setFloat("material.shininess", 64.0f);
 
         forModel.setMat4("projection", projection);
         forModel.setMat4("view", view);
@@ -238,8 +279,14 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
 
-    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && !mouseEnablePressed)
+    {
         mouseEnable = !mouseEnable;
+        mouseEnablePressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
+    {
+        mouseEnablePressed = false;
     }
 }
 
