@@ -11,7 +11,6 @@
 #include <headers/model.h>
 
 #include <iostream>
-#include <map>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -48,6 +47,9 @@ struct PointLight {
     float quadratic;
 };
 
+PointLight pointLight;
+PointLight pointLight1;
+
 int main()
 {
     // glfw: initialize and configure
@@ -63,9 +65,8 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Egipatske znamenitosti", NULL, NULL);
-    if (window == NULL)
-    {
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Egipatske znamenitosti", nullptr, nullptr);
+    if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
@@ -75,12 +76,6 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    // tell GLFW to capture our mouse
-
-
-
-    // glad: load all OpenGL function pointers
-    // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -102,6 +97,8 @@ int main()
     Model temple2("resources/objects/temple2/temple2.obj");
     Model temple3("resources/objects/temple3/temple3.obj");
     Model obelisk("resources/objects/ObeliskPiramide/Obelisk+mini pyramids.obj");
+    Model palma1("resources/objects/Hoewa_Forsteriana_OBJ/hoewa_Forsteriana_1.obj");
+    Model palma2("resources/objects/Hoewa_Forsteriana_OBJ/hoewa_Forsteriana_2.obj");
 
     pyramids.SetShaderTextureNamePrefix("material.");
     temple1.SetShaderTextureNamePrefix("material.");
@@ -109,18 +106,25 @@ int main()
     temple3.SetShaderTextureNamePrefix("material.");
     obelisk.SetShaderTextureNamePrefix("material.");
 
-    PointLight pointLight;
     pointLight.ambient = glm::vec3(0.4, 0.4, 0.2);
     pointLight.diffuse = glm::vec3(0.6, 0.5, 0.6);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
     pointLight.constant = 1.0f;
-    pointLight.linear = 0.0f;
-    pointLight.quadratic = 0.0f;
-    pointLight.position = glm::vec3(4.0, 4.0, 4.0);
+    pointLight.linear = 0.009f;
+    pointLight.quadratic = 0.0032f;
+    pointLight.position = glm::vec3(8.0, 8.0, 12.0);
+
+    pointLight1.ambient = glm::vec3(0.4, 0.4, 0.2);
+    pointLight1.diffuse = glm::vec3(0.6, 0.5, 0.6);
+    pointLight1.specular = glm::vec3(1.0, 1.0, 1.0);
+    pointLight1.constant = 1.0f;
+    pointLight1.linear = 0.009f;
+    pointLight1.quadratic = 0.0032f;
+    pointLight1.position = glm::vec3(8.0, 8.0, -21.0);
 
     glm::vec3 modelPosition [] = {
-            glm::vec3(0.0f, -0.5f, 10.0f),glm::vec3(15.0f, -0.5f, 10.0f), glm::vec3(-15.0f, -0.5f, 10.0f),
-            glm::vec3(0.0f, -0.5f, 15.0f), glm::vec3(7.0f, -0.4f, 10.0f)
+            glm::vec3(0.0f, -0.5f, 10.0f),glm::vec3(15.0f, -0.5f, 10.0f), glm::vec3(15.0f, -0.5f, -10.0f),
+            glm::vec3(0.0f, -0.5f, 15.0f), glm::vec3(7.0f, -0.4f, 10.0f), glm::vec3(-7.0f, -0.5f, 17.0f)
     };
 
     float planeVertices[] = {
@@ -196,9 +200,17 @@ int main()
 
         forModel.use();
 
-        float time = glfwGetTime();
+       // float time = glfwGetTime();
 
-        pointLight.position = glm::vec3(0.0f, 10.0f, 0.0f);
+
+        forModel.setVec3("viewPos", camera.Position);
+        forModel.setFloat("material.shininess", 32.0f);
+
+        // directional light
+//        forModel.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+//        forModel.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+//        forModel.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+//        forModel.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
         forModel.setVec3("pointLight.position", pointLight.position);
         forModel.setVec3("pointLight.ambient", pointLight.ambient);
         forModel.setVec3("pointLight.diffuse", pointLight.diffuse);
@@ -206,6 +218,15 @@ int main()
         forModel.setFloat("pointLight.constant", pointLight.constant);
         forModel.setFloat("pointLight.linear", pointLight.linear);
         forModel.setFloat("pointLight.quadratic", pointLight.quadratic);
+
+        forModel.setVec3("pointLight1.position", pointLight1.position);
+        forModel.setVec3("pointLight1.ambient", pointLight1.ambient);
+        forModel.setVec3("pointLight1.diffuse", pointLight1.diffuse);
+        forModel.setVec3("pointLight1.specular", pointLight1.specular);
+        forModel.setFloat("pointLight1.constant", pointLight1.constant);
+        forModel.setFloat("pointLight1.linear", pointLight1.linear);
+        forModel.setFloat("pointLight1.quadratic", pointLight1.quadratic);
+
         forModel.setVec3("viewPosition", camera.Position);
         forModel.setFloat("material.shininess", 64.0f);
 
@@ -226,14 +247,14 @@ int main()
         forModel.setMat4("model", model);
         temple1.Draw(forModel);
 
-        // srednji templ
+        // srednji temple
         model = glm::mat4(1.0f);
         model = glm::translate(model, modelPosition[2]);
         model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
         forModel.setMat4("model", model);
         temple2.Draw(forModel);
 
-        // mali templ
+        // mali temple
         model = glm::mat4(1.0f);
         model = glm::translate(model, modelPosition[3]);
         model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
@@ -246,6 +267,16 @@ int main()
         model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
         forModel.setMat4("model", model);
         obelisk.Draw(forModel);
+
+        for (unsigned int i = 0; i<10; i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model,  glm::vec3(modelPosition[5].x, modelPosition[5].y, modelPosition[5].z - i*2.0f));
+            model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));
+            forModel.setMat4("model", model);
+            palma1.Draw(forModel);
+        }
+        // palma1
+
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -265,8 +296,7 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
-{
+void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
@@ -278,22 +308,39 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+//
+//    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+//        std::cout << pointLight.position.x << " " << pointLight.position.y << " " << pointLight.position.z << std::endl;
+//        pointLight.position.z -= 1.0f;
+//    }
+//
+//    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+//        std::cout << pointLight1.position.x << " " << pointLight1.position.y << " " << pointLight1.position.z << std::endl;
+//        pointLight.position.z += 1.0f;
+//    }
+//
+//    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+//        std::cout << pointLight1.position.x << " " << pointLight1.position.y << " " << pointLight1.position.z << std::endl;
+//        pointLight.position.x -= 1.0f;
+//    }
+//
+//    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+//        std::cout << pointLight1.position.x << " " << pointLight1.position.y << " " << pointLight1.position.z << std::endl;
+//        pointLight.position.x += 1.0f;
+//    }
 
-    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && !mouseEnablePressed)
-    {
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mouseEnablePressed) {
         mouseEnable = !mouseEnable;
         mouseEnablePressed = true;
     }
-    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
-    {
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE) {
         mouseEnablePressed = false;
     }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
@@ -301,8 +348,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (firstMouse)
     {
         lastX = xpos;
@@ -321,22 +367,19 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(yoffset);
 }
 
 // utility function for loading a 2D texture from file
 // ---------------------------------------------------
-unsigned int loadTexture(char const *path)
-{
+unsigned int loadTexture(char const *path) {
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
     unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data)
-    {
+    if (data) {
         GLenum format;
         if (nrComponents == 1)
             format = GL_RED;
@@ -356,8 +399,7 @@ unsigned int loadTexture(char const *path)
 
         stbi_image_free(data);
     }
-    else
-    {
+    else {
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
