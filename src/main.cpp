@@ -11,6 +11,7 @@
 #include <headers/model.h>
 
 #include <iostream>
+#include <map>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -23,7 +24,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(5.0f, 4.0f, 15.0f));
 float lastX = (float)SCR_WIDTH  / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -31,6 +32,8 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+bool mouseEnable = true;
 
 int main()
 {
@@ -60,7 +63,8 @@ int main()
     glfwSetScrollCallback(window, scroll_callback);
 
     // tell GLFW to capture our mouse
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -77,10 +81,19 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader shader("resources/shaders/planeVS.vs", "resources/shaders/planeFS.fs");
-    Shader forModel("resources/shaders/1.model_loading.vs", "resources/shaders/1.model_loading.fs");
+    Shader planeShader("resources/shaders/planeVS.vs", "resources/shaders/planeFS.fs");
+    Shader forModel("resources/shaders/model_loading.vs", "resources/shaders/model_loading.fs");
 
-    Model ourModel("resources/objects/sve/pyramids.obj");
+    Model pyramids("resources/objects/pyramids/pyramids.obj");
+    Model temple1("resources/objects/temple1/temple1.obj");
+    Model temple2("resources/objects/temple2/temple2.obj");
+    Model temple3("resources/objects/temple3/temple3.obj");
+    Model obelisk("resources/objects/ObeliskPiramide/Obelisk+mini pyramids.obj");
+
+    glm::vec3 modelPosition [] = {
+            glm::vec3(0.0f, -0.5f, 10.0f),glm::vec3(15.0f, -0.5f, 10.0f), glm::vec3(-15.0f, -0.5f, 10.0f),
+            glm::vec3(0.0f, -0.5f, 15.0f), glm::vec3(7.0f, -0.4f, 10.0f)
+    };
 
     float planeVertices[] = {
             // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
@@ -110,13 +123,20 @@ int main()
 
     // shader configuration
     // --------------------
-    shader.use();
-    shader.setInt("texture1", 0);
+    planeShader.use();
+    planeShader.setInt("texture1", 0);
 
     // render loop
     // -----------
     while(!glfwWindowShouldClose(window))
     {
+        if (!mouseEnable) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+        else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
@@ -132,32 +152,59 @@ int main()
         glClearColor(0.6f, 0.8f, 0.9f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.use();
+        planeShader.use();
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        shader.setMat4("view", view);
-        shader.setMat4("projection", projection);
+        planeShader.setMat4("view", view);
+        planeShader.setMat4("projection", projection);
 
+        // render floor
         glBindVertexArray(planeVAO);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
-        shader.setMat4("model", glm::scale(model,glm::vec3(5.0f,1.0f,5.0f)));
+        planeShader.setMat4("model", glm::scale(model,glm::vec3(5.0f,1.0f,5.0f)));
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
         forModel.use();
 
-        glm::mat4 projectionObject = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 viewObject = camera.GetViewMatrix();
         forModel.setMat4("projection", projection);
         forModel.setMat4("view", view);
 
-        // render the loaded model
-        glm::mat4 modelObject = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 1.0f, 10.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));	// it's a bit too big for our scene, so scale it down
+        // velike piramide
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, modelPosition[0]);
+        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
         forModel.setMat4("model", model);
-        ourModel.Draw(forModel);
+        pyramids.Draw(forModel);
+
+        // veliki templ
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, modelPosition[1]);
+        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+        forModel.setMat4("model", model);
+        temple1.Draw(forModel);
+
+        // srednji templ
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, modelPosition[2]);
+        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+        forModel.setMat4("model", model);
+        temple2.Draw(forModel);
+
+        // mali templ
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, modelPosition[3]);
+        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+        forModel.setMat4("model", model);
+        temple3.Draw(forModel);
+
+        // obelisk i male piramide
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, modelPosition[4]);
+        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+        forModel.setMat4("model", model);
+        obelisk.Draw(forModel);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -167,9 +214,8 @@ int main()
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-//    glDeleteVertexArrays(1, &cubeVAO);
+
     glDeleteVertexArrays(1, &planeVAO);
-//    glDeleteBuffers(1, &cubeVBO);
     glDeleteBuffers(1, &planeVBO);
 
     glfwTerminate();
@@ -191,6 +237,10 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+        mouseEnable = !mouseEnable;
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
