@@ -18,13 +18,14 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 unsigned int loadTexture(const char *path);
 unsigned int loadCubemap(vector<std::string> faces);
+void renderScene(Shader& shader, std::vector<Model*> objekti);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(5.0f, 4.0f, 15.0f));
+Camera camera(glm::vec3(5.0f, 10.0f, 35.0f));
 float lastX = (float)SCR_WIDTH  / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -35,6 +36,13 @@ float lastFrame = 0.0f;
 
 bool mouseEnable = false;
 bool mouseEnablePressed = false;
+
+unsigned int planeVAO;
+
+glm::vec3 modelPosition [] = {
+        glm::vec3(0.0f, -0.5f, 20.0f),glm::vec3(30.0f, -0.5f, 20.0f), glm::vec3(30.0f, -0.5f, -20.0f),
+        glm::vec3(0.0f, -0.5f, 30.0f), glm::vec3(14.0f, -0.4f, 10.0f), glm::vec3(-14.0f, -0.5f, 34.0f)
+};
 
 int main()
 {
@@ -75,7 +83,6 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader planeShader("resources/shaders/planeVS.vs", "resources/shaders/planeFS.fs");
     Shader forModel("resources/shaders/model_loading.vs", "resources/shaders/model_loading.fs");
     Shader skyBoxShader("resources/shaders/skybox.vs","resources/shaders/skybox.fs");
 
@@ -87,27 +94,45 @@ int main()
     Model palma1("resources/objects/Hoewa_Forsteriana_OBJ/hoewa_Forsteriana_1.obj");
     Model palma2("resources/objects/Hoewa_Forsteriana_OBJ/hoewa_Forsteriana_2.obj");
 
-    pyramids.SetShaderTextureNamePrefix("material.");
-    temple1.SetShaderTextureNamePrefix("material.");
-    temple2.SetShaderTextureNamePrefix("material.");
-    temple3.SetShaderTextureNamePrefix("material.");
-    obelisk.SetShaderTextureNamePrefix("material.");
+    std::vector<Model*> objekti;
+    objekti.push_back(&pyramids);
+    objekti.push_back(&temple1);
+    objekti.push_back(&temple2);
+    objekti.push_back(&temple3);
+    objekti.push_back(&obelisk);
+    objekti.push_back(&palma1);
+    objekti.push_back(&palma2);
 
-    glm::vec3 modelPosition [] = {
-            glm::vec3(0.0f, -0.5f, 10.0f),glm::vec3(15.0f, -0.5f, 10.0f), glm::vec3(15.0f, -0.5f, -10.0f),
-            glm::vec3(0.0f, -0.5f, 15.0f), glm::vec3(7.0f, -0.4f, 10.0f), glm::vec3(-7.0f, -0.5f, 17.0f)
-    };
+//    for (Model* m : objekti) {
+//        m->SetShaderTextureNamePrefix("material.");
+//    }
 
     float planeVertices[] = {
-            // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
-            5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-            -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-            -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+            // positions            // normals                                  // texcoords
+            10.0f, -0.5f,  10.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
+            -10.0f, -0.5f,  10.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+            -10.0f, -0.5f, -10.0f,  0.0f, 1.0f, 0.0f,   0.0f, 10.0f,
 
-            5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-            -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-            5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+            10.0f, -0.5f,  10.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
+            -10.0f, -0.5f, -10.0f,  0.0f, 1.0f, 0.0f,   0.0f, 10.0f,
+            10.0f, -0.5f, -10.0f,  0.0f, 1.0f, 0.0f,  10.0f, 10.0f
     };
+
+    unsigned int planeVBO;
+    glGenVertexArrays(1, &planeVAO);
+    glGenBuffers(1, &planeVBO);
+    glBindVertexArray(planeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glBindVertexArray(0);
+
+    unsigned int floorTexture = loadTexture("resources/textures/pod.jpg");
 
     float skyboxVertices[] = {
             // positions
@@ -154,18 +179,6 @@ int main()
             1.0f, -1.0f,  1.0f
     };
 
-    unsigned int planeVAO, planeVBO;
-    glGenVertexArrays(1, &planeVAO);
-    glGenBuffers(1, &planeVBO);
-    glBindVertexArray(planeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glBindVertexArray(0);
-
     // skybox
     unsigned int skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
@@ -176,8 +189,6 @@ int main()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-    // load texture
-    unsigned int floorTexture = loadTexture("resources/textures/sand.jpg");
 
     vector<std::string> faces {
         "resources/textures/Teide/right.jpg",
@@ -191,8 +202,8 @@ int main()
 
     // shader configuration
     // --------------------
-    planeShader.use();
-    planeShader.setInt("texture1", 0);
+    forModel.use();
+    forModel.setInt("material.diffuse_texture1", 0);
 
     skyBoxShader.use();
     skyBoxShader.setInt("skybox",0);
@@ -223,25 +234,17 @@ int main()
         glClearColor(0.6f, 0.8f, 0.9f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        planeShader.use();
+        forModel.use();
+
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        planeShader.setMat4("view", view);
-        planeShader.setMat4("projection", projection);
-
-        // render floor
-        glBindVertexArray(planeVAO);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
-        planeShader.setMat4("model", glm::scale(model,glm::vec3(5.0f,1.0f,5.0f)));
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-
-        forModel.use();
 
         // directional light
         forModel.setVec3("dirLight.direction", 6.0f, -4.0f, 0.0f);
-        forModel.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
+        forModel.setVec3("dirLight.ambient", 0.3f, 0.3f, 0.3f);
         forModel.setVec3("dirLight.diffuse", 0.6f, 0.6f, 0.6f);
         forModel.setVec3("dirLight.specular", 0.7f, 0.7f, 0.7f);
 
@@ -251,49 +254,7 @@ int main()
         forModel.setMat4("projection", projection);
         forModel.setMat4("view", view);
 
-        // velike piramide
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, modelPosition[0]);
-        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
-        forModel.setMat4("model", model);
-        pyramids.Draw(forModel);
-
-        // veliki templ
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, modelPosition[1]);
-        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
-        forModel.setMat4("model", model);
-        temple1.Draw(forModel);
-
-        // srednji temple
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, modelPosition[2]);
-        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
-        forModel.setMat4("model", model);
-        temple2.Draw(forModel);
-
-        // mali temple
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, modelPosition[3]);
-        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
-        forModel.setMat4("model", model);
-        temple3.Draw(forModel);
-
-        // obelisk i male piramide
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, modelPosition[4]);
-        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
-        forModel.setMat4("model", model);
-        obelisk.Draw(forModel);
-
-        for (unsigned int i = 0; i<10; i++) {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model,  glm::vec3(modelPosition[5].x, modelPosition[5].y, modelPosition[5].z - i*2.0f));
-            model = glm::scale(model, glm::vec3(0.02f, 0.02f, 0.02f));
-            forModel.setMat4("model", model);
-            palma1.Draw(forModel);
-        }
-        // palma1
+        renderScene(forModel, objekti);
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
@@ -323,6 +284,40 @@ int main()
 
     glfwTerminate();
     return 0;
+}
+
+void renderScene(Shader& shader, std::vector<Model*> objekti) {
+    glm::mat4 model = glm::mat4(1.0f);
+    glBindVertexArray(planeVAO);
+    shader.setMat4("model", glm::scale(model,glm::vec3(5.0f,1.0f,5.0f)));
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    // directional light
+    shader.setVec3("dirLight.direction", 6.0f, -4.0f, 0.0f);
+    shader.setVec3("dirLight.ambient", 0.3f, 0.3f, 0.3f);
+    shader.setVec3("dirLight.diffuse", 0.6f, 0.6f, 0.6f);
+    shader.setVec3("dirLight.specular", 0.7f, 0.7f, 0.7f);
+
+    shader.setVec3("viewPosition", camera.Position);
+    shader.setFloat("material.shininess", 64.0f);
+
+    for (int i = 0; i<objekti.size()-2; i++) {
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, modelPosition[i]);
+        model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
+        shader.setMat4("model", model);
+        objekti[i]->Draw(shader);
+    }
+
+    for (unsigned int i = 0; i<10; i++) {
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,  glm::vec3(modelPosition[5].x, modelPosition[5].y, modelPosition[5].z - i*4.0f));
+        model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
+        shader.setMat4("model", model);
+        if (i % 2 == 0) objekti[objekti.size()-2]->Draw(shader);
+        else objekti[objekti.size()-1]->Draw(shader);
+    }
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
