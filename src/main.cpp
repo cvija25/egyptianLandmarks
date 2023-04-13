@@ -36,21 +36,6 @@ float lastFrame = 0.0f;
 bool mouseEnable = false;
 bool mouseEnablePressed = false;
 
-struct PointLight {
-    glm::vec3 position;
-
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-
-    float constant;
-    float linear;
-    float quadratic;
-};
-
-PointLight pointLight;
-PointLight pointLight1;
-
 int main()
 {
     // glfw: initialize and configure
@@ -92,7 +77,7 @@ int main()
     // -------------------------
     Shader planeShader("resources/shaders/planeVS.vs", "resources/shaders/planeFS.fs");
     Shader forModel("resources/shaders/model_loading.vs", "resources/shaders/model_loading.fs");
-    Shader skyBoxShader("resources/shaders/6.1.skybox.vs","resources/shaders/6.1.skybox.fs");
+    Shader skyBoxShader("resources/shaders/skybox.vs","resources/shaders/skybox.fs");
 
     Model pyramids("resources/objects/pyramids/pyramids.obj");
     Model temple1("resources/objects/temple1/temple1.obj");
@@ -107,22 +92,6 @@ int main()
     temple2.SetShaderTextureNamePrefix("material.");
     temple3.SetShaderTextureNamePrefix("material.");
     obelisk.SetShaderTextureNamePrefix("material.");
-
-    pointLight.ambient = glm::vec3(0.4, 0.4, 0.2);
-    pointLight.diffuse = glm::vec3(0.6, 0.5, 0.6);
-    pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
-    pointLight.constant = 1.0f;
-    pointLight.linear = 0.009f;
-    pointLight.quadratic = 0.0032f;
-    pointLight.position = glm::vec3(8.0, 8.0, 12.0);
-
-    pointLight1.ambient = glm::vec3(0.4, 0.4, 0.2);
-    pointLight1.diffuse = glm::vec3(0.6, 0.5, 0.6);
-    pointLight1.specular = glm::vec3(1.0, 1.0, 1.0);
-    pointLight1.constant = 1.0f;
-    pointLight1.linear = 0.009f;
-    pointLight1.quadratic = 0.0032f;
-    pointLight1.position = glm::vec3(8.0, 8.0, -21.0);
 
     glm::vec3 modelPosition [] = {
             glm::vec3(0.0f, -0.5f, 10.0f),glm::vec3(15.0f, -0.5f, 10.0f), glm::vec3(15.0f, -0.5f, -10.0f),
@@ -211,12 +180,12 @@ int main()
     unsigned int floorTexture = loadTexture("resources/textures/sand.jpg");
 
     vector<std::string> faces {
-        "resources/textures/skybox/right.jpg",
-        "resources/textures/skybox/left.jpg",
-        "resources/textures/skybox/top.jpg",
-        "resources/textures/skybox/bottom.jpg",
-        "resources/textures/skybox/front.jpg",
-        "resources/textures/skybox/back.jpg"
+        "resources/textures/Teide/right.jpg",
+        "resources/textures/Teide/left.jpg",
+        "resources/textures/Teide/top.jpg",
+        "resources/textures/Teide/bottom.jpg",
+        "resources/textures/Teide/front.jpg",
+        "resources/textures/Teide/back.jpg"
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
@@ -270,32 +239,11 @@ int main()
 
         forModel.use();
 
-       // float time = glfwGetTime();
-
-
-        forModel.setVec3("viewPos", camera.Position);
-        forModel.setFloat("material.shininess", 32.0f);
-
         // directional light
-//        forModel.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-//        forModel.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-//        forModel.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-//        forModel.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-        forModel.setVec3("pointLight.position", pointLight.position);
-        forModel.setVec3("pointLight.ambient", pointLight.ambient);
-        forModel.setVec3("pointLight.diffuse", pointLight.diffuse);
-        forModel.setVec3("pointLight.specular", pointLight.specular);
-        forModel.setFloat("pointLight.constant", pointLight.constant);
-        forModel.setFloat("pointLight.linear", pointLight.linear);
-        forModel.setFloat("pointLight.quadratic", pointLight.quadratic);
-
-        forModel.setVec3("pointLight1.position", pointLight1.position);
-        forModel.setVec3("pointLight1.ambient", pointLight1.ambient);
-        forModel.setVec3("pointLight1.diffuse", pointLight1.diffuse);
-        forModel.setVec3("pointLight1.specular", pointLight1.specular);
-        forModel.setFloat("pointLight1.constant", pointLight1.constant);
-        forModel.setFloat("pointLight1.linear", pointLight1.linear);
-        forModel.setFloat("pointLight1.quadratic", pointLight1.quadratic);
+        forModel.setVec3("dirLight.direction", 6.0f, -4.0f, 0.0f);
+        forModel.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
+        forModel.setVec3("dirLight.diffuse", 0.6f, 0.6f, 0.6f);
+        forModel.setVec3("dirLight.specular", 0.7f, 0.7f, 0.7f);
 
         forModel.setVec3("viewPosition", camera.Position);
         forModel.setFloat("material.shininess", 64.0f);
