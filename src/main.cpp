@@ -20,12 +20,10 @@ unsigned int loadTexture(const char *path);
 unsigned int loadCubemap(vector<std::string> faces);
 void renderScene(Shader& shader, std::vector<Model*> objekti);
 
-// settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-// camera
-Camera camera(glm::vec3(5.0f, 10.0f, 35.0f));
+Camera camera(glm::vec3(15.0f, 10.0f, 35.0f));
 float lastX = (float)SCR_WIDTH  / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -37,19 +35,19 @@ float lastFrame = 0.0f;
 bool mouseEnable = false;
 bool mouseEnablePressed = false;
 
-void renderQuad();
+//void renderQuad();
 
 unsigned int planeVAO;
 
 glm::vec3 modelPosition [] = {
         glm::vec3(0.0f, -0.5f, 20.0f),glm::vec3(30.0f, -0.5f, 40.0f), glm::vec3(30.0f, -0.5f, 0.0f),
-        glm::vec3(0.0f, -0.5f, 30.0f), glm::vec3(14.0f, -0.4f, 10.0f), glm::vec3(-14.0f, -0.5f, 34.0f)
+        glm::vec3(0.0f, -0.5f, 30.0f), glm::vec3(14.0f, -0.4f, 10.0f),glm::vec3(-1.0f, 0.0f, 20.0f),glm::vec3(30.0f, 5.3f, 16.0f),
+        glm::vec3(-14.0f, -0.5f, 34.0f)
 };
 
 int main()
 {
-    // glfw: initialize and configure
-    // ------------------------------
+    // incijalizacija glfw
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -59,8 +57,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    // glfw window creation
-    // --------------------
+    // glfw prozor
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Egipatske znamenitosti", nullptr, nullptr);
     if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -72,24 +69,20 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
 
-    // configure global opengl state
-    // -----------------------------
     glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_ALWAYS); // always pass the depth test (same effect as glDisable(GL_DEPTH_TEST))
 
-    // build and compile shaders
-    // -------------------------
+    // shaders
     Shader depthShader("resources/shaders/shadow_mapping_depth.vs","resources/shaders/shadow_mapping_depth.fs");
     Shader forModel("resources/shaders/model_loading.vs", "resources/shaders/model_loading.fs");
     Shader skyBoxShader("resources/shaders/skybox.vs","resources/shaders/skybox.fs");
     Shader depthDebug("resources/shaders/debug.vs","resources/shaders/debug.fs");
 
+    // objects
     Model pyramids("resources/objects/pyramids/pyramids.obj");
     Model temple1("resources/objects/temple1/temple1.obj");
     Model temple2("resources/objects/temple2/temple2.obj");
@@ -97,13 +90,18 @@ int main()
     Model obelisk("resources/objects/ObeliskPiramide/Obelisk+mini pyramids.obj");
     Model palma1("resources/objects/Hoewa_Forsteriana_OBJ/hoewa_Forsteriana_1.obj");
     Model palma2("resources/objects/Hoewa_Forsteriana_OBJ/hoewa_Forsteriana_2.obj");
+    Model kutija("resources/objects/TutBox/TutPaintedChest.obj");
+    Model mumija("resources/objects/mummy/mummy.obj");
 
+    // objects array
     std::vector<Model*> objekti;
     objekti.push_back(&pyramids);
     objekti.push_back(&temple1);
     objekti.push_back(&temple2);
     objekti.push_back(&temple3);
     objekti.push_back(&obelisk);
+    objekti.push_back(&mumija);
+    objekti.push_back(&kutija);
     objekti.push_back(&palma1);
     objekti.push_back(&palma2);
 
@@ -111,6 +109,7 @@ int main()
 //        m->SetShaderTextureNamePrefix("material.");
 //    }
 
+    // scene floor
     float planeVertices[] = {
             // positions            // normals                                  // texcoords
             10.0f, -0.5f,  10.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
@@ -138,6 +137,7 @@ int main()
 
     unsigned int floorTexture = loadTexture("resources/textures/pod.jpg");
 
+    // skybox
     float skyboxVertices[] = {
             // positions
             -1.0f,  1.0f, -1.0f,
@@ -183,7 +183,6 @@ int main()
             1.0f, -1.0f,  1.0f
     };
 
-    // skybox
     unsigned int skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
     glGenBuffers(1, &skyboxVBO);
@@ -192,7 +191,6 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
 
     vector<std::string> faces {
         "resources/textures/Teide/right.jpg",
@@ -204,10 +202,12 @@ int main()
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
+    // shadow mapping
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     unsigned int depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
-    // create depth texture
+
+    // depth texture
     unsigned int depthMap;
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);
@@ -218,6 +218,7 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
     // attach depth texture as FBO's depth buffer
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
@@ -225,9 +226,7 @@ int main()
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // shader configuration
-    // --------------------
-
+    // postavaljanje uniforma
     forModel.use();
     forModel.setInt("material.diffuse_texture1", 0);
     forModel.setInt("shadowMap", 1);
@@ -240,8 +239,7 @@ int main()
 
     glm::vec3 lightPos(40.0f, 40.0f, 11.0f);
 
-    // render loop
-    // -----------
+    // petlja renderovanja
     while(!glfwWindowShouldClose(window))
     {
         if (!mouseEnable) {
@@ -252,17 +250,12 @@ int main()
         }
 
         // per-frame time logic
-        // --------------------
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        // input
-        // -----
         processInput(window);
 
-        // render
-        // ------
         glClearColor(0.6f, 0.8f, 0.9f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -275,7 +268,8 @@ int main()
         lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
         lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
         lightSpaceMatrix = lightProjection * lightView;
-        // render scene from light's point of view
+
+        // renderujemo scenu iz perspekive direkcionog svetla i popunjavamo depth mapu
         depthShader.use();
         depthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
@@ -291,6 +285,7 @@ int main()
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // debug depth map
 //        depthDebug.use();
 //        depthDebug.setFloat("near_plane", near_plane);
 //        depthDebug.setFloat("far_plane", far_plane);
@@ -300,7 +295,6 @@ int main()
 
         forModel.use();
 
-//        glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
         forModel.setMat4("projection", projection);
@@ -317,13 +311,15 @@ int main()
         forModel.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
         forModel.setFloat("material.shininess", 64.0f);
+
+        // aktiviramo teksture za pod i depth mapu i sada renderujemo nazad iz pozicije kamere
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, depthMap);
         renderScene(forModel, objekti);
 
-//        draw skybox as last
+        // na kraju crtamo skybox
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         skyBoxShader.use();
         view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
@@ -337,8 +333,6 @@ int main()
         glBindVertexArray(0);
         glDepthFunc(GL_LESS); // set depth function back to default
 
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -347,7 +341,9 @@ int main()
     // ------------------------------------------------------------------------
 
     glDeleteVertexArrays(1, &planeVAO);
+    glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteBuffers(1, &planeVBO);
+    glDeleteBuffers(1, &skyboxVBO);
 
     glfwTerminate();
     return 0;
@@ -359,7 +355,7 @@ void renderScene(Shader& shader, std::vector<Model*> objekti) {
     glBindVertexArray(planeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    for (int i = 0; i<objekti.size()-2; i++) {
+    for (int i = 0; i<objekti.size()-4; i++) {
         model = glm::mat4(1.0f);
         model = glm::translate(model, modelPosition[i]);
         model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
@@ -367,9 +363,35 @@ void renderScene(Shader& shader, std::vector<Model*> objekti) {
         objekti[i]->Draw(shader);
     }
 
+    // mumija
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, modelPosition[5]);
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f,0.0f,1.0f));
+    model = glm::scale(model, glm::vec3(0.07f, 0.07f, 0.07f));
+    shader.setMat4("model", model);
+    objekti[5]->Draw(shader);
+
+    // kutija
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, modelPosition[6]);
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
+    model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+    shader.setMat4("model", model);
+    objekti[6]->Draw(shader);
+
     for (unsigned int i = 0; i<10; i++) {
         model = glm::mat4(1.0f);
-        model = glm::translate(model,  glm::vec3(modelPosition[5].x, modelPosition[5].y, modelPosition[5].z - i*4.0f));
+        model = glm::translate(model,  glm::vec3(modelPosition[7].x, modelPosition[7].y, modelPosition[7].z - i*4.0f));
+        model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
+        shader.setMat4("model", model);
+        if (i % 2 == 0) objekti[objekti.size()-2]->Draw(shader);
+        else objekti[objekti.size()-1]->Draw(shader);
+    }
+
+    for (unsigned int i = 0; i<5; i++) {
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,  glm::vec3(modelPosition[7].x + 27.0f, modelPosition[7].y, modelPosition[7].z - i*4.0f));
         model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
         shader.setMat4("model", model);
         if (i % 2 == 0) objekti[objekti.size()-2]->Draw(shader);
@@ -377,38 +399,36 @@ void renderScene(Shader& shader, std::vector<Model*> objekti) {
     }
 }
 
-unsigned int quadVAO = 0;
-unsigned int quadVBO;
-void renderQuad()
-{
-    if (quadVAO == 0)
-    {
-        float quadVertices[] = {
-                // positions        // texture Coords
-                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-        };
-        // setup plane VAO
-        glGenVertexArrays(1, &quadVAO);
-        glGenBuffers(1, &quadVBO);
-        glBindVertexArray(quadVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    }
-    glBindVertexArray(quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
-}
+// used for debuging shadows
+//unsigned int quadVAO = 0;
+//unsigned int quadVBO;
+//void renderQuad()
+//{
+//    if (quadVAO == 0)
+//    {
+//        float quadVertices[] = {
+//                // positions        // texture Coords
+//                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+//                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+//                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+//                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+//        };
+//        // setup plane VAO
+//        glGenVertexArrays(1, &quadVAO);
+//        glGenBuffers(1, &quadVBO);
+//        glBindVertexArray(quadVAO);
+//        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+//        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+//        glEnableVertexAttribArray(0);
+//        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+//        glEnableVertexAttribArray(1);
+//        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+//    }
+//    glBindVertexArray(quadVAO);
+//    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+//    glBindVertexArray(0);
+//}
 
-
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -421,26 +441,6 @@ void processInput(GLFWwindow *window) {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
-//
-//    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-//        std::cout << pointLight.position.x << " " << pointLight.position.y << " " << pointLight.position.z << std::endl;
-//        pointLight.position.z -= 1.0f;
-//    }
-//
-//    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-//        std::cout << pointLight1.position.x << " " << pointLight1.position.y << " " << pointLight1.position.z << std::endl;
-//        pointLight.position.z += 1.0f;
-//    }
-//
-//    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-//        std::cout << pointLight1.position.x << " " << pointLight1.position.y << " " << pointLight1.position.z << std::endl;
-//        pointLight.position.x -= 1.0f;
-//    }
-//
-//    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-//        std::cout << pointLight1.position.x << " " << pointLight1.position.y << " " << pointLight1.position.z << std::endl;
-//        pointLight.position.x += 1.0f;
-//    }
 
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mouseEnablePressed) {
         mouseEnable = !mouseEnable;
@@ -451,16 +451,10 @@ void processInput(GLFWwindow *window) {
     }
 }
 
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    // make sure the viewport matches the new window dimensions; note that width and
-    // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
 }
 
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (firstMouse)
     {
@@ -470,7 +464,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset = lastY - ypos;
 
     lastX = xpos;
     lastY = ypos;
@@ -478,14 +472,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(yoffset);
 }
 
-// utility function for loading a 2D texture from file
-// ---------------------------------------------------
 unsigned int loadTexture(char const *path) {
     unsigned int textureID;
     glGenTextures(1, &textureID);
