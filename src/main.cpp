@@ -135,7 +135,7 @@ int main()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glBindVertexArray(0);
 
-    unsigned int floorTexture = loadTexture("resources/textures/pod.jpg");
+    unsigned int floorTexture = loadTexture("resources/textures/pod1.jpg");
 
     // skybox
     float skyboxVertices[] = {
@@ -193,13 +193,15 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     vector<std::string> faces {
-        "resources/textures/Teide/right.jpg",
-        "resources/textures/Teide/left.jpg",
-        "resources/textures/Teide/top.jpg",
-        "resources/textures/Teide/bottom.jpg",
-        "resources/textures/Teide/front.jpg",
-        "resources/textures/Teide/back.jpg"
+        "resources/textures/skybox1/right1.png",
+        "resources/textures/skybox1/left1.png",
+        "resources/textures/skybox1/top1.png",
+        "resources/textures/skybox1/bottom1.png",
+        "resources/textures/skybox1/front1.png",
+        "resources/textures/skybox1/back1.png"
     };
+
+    stbi_set_flip_vertically_on_load(false);
     unsigned int cubemapTexture = loadCubemap(faces);
 
     // shadow mapping
@@ -522,7 +524,7 @@ unsigned int loadCubemap(vector<std::string> faces)
         unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
         if (data)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         }
         else
