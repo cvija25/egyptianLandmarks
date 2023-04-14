@@ -37,10 +37,12 @@ float lastFrame = 0.0f;
 bool mouseEnable = false;
 bool mouseEnablePressed = false;
 
+void renderQuad();
+
 unsigned int planeVAO;
 
 glm::vec3 modelPosition [] = {
-        glm::vec3(0.0f, -0.5f, 20.0f),glm::vec3(30.0f, -0.5f, 20.0f), glm::vec3(30.0f, -0.5f, -20.0f),
+        glm::vec3(0.0f, -0.5f, 20.0f),glm::vec3(30.0f, -0.5f, 40.0f), glm::vec3(30.0f, -0.5f, 0.0f),
         glm::vec3(0.0f, -0.5f, 30.0f), glm::vec3(14.0f, -0.4f, 10.0f), glm::vec3(-14.0f, -0.5f, 34.0f)
 };
 
@@ -83,8 +85,10 @@ int main()
 
     // build and compile shaders
     // -------------------------
+    Shader depthShader("resources/shaders/shadow_mapping_depth.vs","resources/shaders/shadow_mapping_depth.fs");
     Shader forModel("resources/shaders/model_loading.vs", "resources/shaders/model_loading.fs");
     Shader skyBoxShader("resources/shaders/skybox.vs","resources/shaders/skybox.fs");
+    Shader depthDebug("resources/shaders/debug.vs","resources/shaders/debug.fs");
 
     Model pyramids("resources/objects/pyramids/pyramids.obj");
     Model temple1("resources/objects/temple1/temple1.obj");
@@ -200,13 +204,41 @@ int main()
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    // create depth texture
+    unsigned int depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     // shader configuration
     // --------------------
+
     forModel.use();
     forModel.setInt("material.diffuse_texture1", 0);
+    forModel.setInt("shadowMap", 1);
+
+    depthDebug.use();
+    depthDebug.setInt("depthMap", 0);
 
     skyBoxShader.use();
     skyBoxShader.setInt("skybox",0);
+
+    glm::vec3 lightPos(40.0f, 40.0f, 11.0f);
 
     // render loop
     // -----------
@@ -234,29 +266,64 @@ int main()
         glClearColor(0.6f, 0.8f, 0.9f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+        // matrica projekcije i pogleda iz perspektive svetla
+        glm::mat4 lightProjection, lightView;
+        glm::mat4 lightSpaceMatrix;
+        float near_plane = 1.0f, far_plane = 120.0f;
+
+        lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
+        lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+        lightSpaceMatrix = lightProjection * lightView;
+        // render scene from light's point of view
+        depthShader.use();
+        depthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, floorTexture);
+            renderScene(depthShader, objekti);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // reset viewport
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//        depthDebug.use();
+//        depthDebug.setFloat("near_plane", near_plane);
+//        depthDebug.setFloat("far_plane", far_plane);
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, depthMap);
+//        renderQuad();
+
         forModel.use();
 
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = camera.GetViewMatrix();
+//        glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, floorTexture);
-
-        // directional light
-        forModel.setVec3("dirLight.direction", 6.0f, -4.0f, 0.0f);
-        forModel.setVec3("dirLight.ambient", 0.3f, 0.3f, 0.3f);
-        forModel.setVec3("dirLight.diffuse", 0.6f, 0.6f, 0.6f);
-        forModel.setVec3("dirLight.specular", 0.7f, 0.7f, 0.7f);
-
-        forModel.setVec3("viewPosition", camera.Position);
-        forModel.setFloat("material.shininess", 64.0f);
-
+        glm::mat4 view = camera.GetViewMatrix();
         forModel.setMat4("projection", projection);
         forModel.setMat4("view", view);
 
+        // directional light
+//        forModel.setVec3("dirLight.direction", 6.0f, -4.0f, 0.0f);
+//        forModel.setVec3("dirLight.ambient", 0.3f, 0.3f, 0.3f);
+//        forModel.setVec3("dirLight.diffuse", 0.6f, 0.6f, 0.6f);
+//        forModel.setVec3("dirLight.specular", 0.7f, 0.7f, 0.7f);
+
+        forModel.setVec3("viewPosition", camera.Position);
+        forModel.setVec3("lightPos", lightPos);
+        forModel.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+        forModel.setFloat("material.shininess", 64.0f);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, floorTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
         renderScene(forModel, objekti);
 
-        // draw skybox as last
+//        draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         skyBoxShader.use();
         view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
@@ -288,19 +355,9 @@ int main()
 
 void renderScene(Shader& shader, std::vector<Model*> objekti) {
     glm::mat4 model = glm::mat4(1.0f);
-    glBindVertexArray(planeVAO);
     shader.setMat4("model", glm::scale(model,glm::vec3(5.0f,1.0f,5.0f)));
+    glBindVertexArray(planeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-
-    // directional light
-    shader.setVec3("dirLight.direction", 6.0f, -4.0f, 0.0f);
-    shader.setVec3("dirLight.ambient", 0.3f, 0.3f, 0.3f);
-    shader.setVec3("dirLight.diffuse", 0.6f, 0.6f, 0.6f);
-    shader.setVec3("dirLight.specular", 0.7f, 0.7f, 0.7f);
-
-    shader.setVec3("viewPosition", camera.Position);
-    shader.setFloat("material.shininess", 64.0f);
 
     for (int i = 0; i<objekti.size()-2; i++) {
         model = glm::mat4(1.0f);
@@ -319,6 +376,36 @@ void renderScene(Shader& shader, std::vector<Model*> objekti) {
         else objekti[objekti.size()-1]->Draw(shader);
     }
 }
+
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+                // positions        // texture Coords
+                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
