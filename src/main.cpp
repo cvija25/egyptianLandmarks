@@ -18,10 +18,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 unsigned int loadTexture(const char *path);
 unsigned int loadCubemap(vector<std::string> faces);
-void renderScene(Shader& shader, std::vector<Model*> objekti);
+void renderScene(Shader& shader, Model& pyramids, Model& temple1, Model& temple2, Model& temple3, Model& obelisk, Model& palma);
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
 Camera camera(glm::vec3(15.0f, 10.0f, 35.0f));
 float lastX = (float)SCR_WIDTH  / 2.0;
@@ -36,16 +36,13 @@ float lastFrame = 0.0f;
 bool mouseEnable = false;
 bool mouseEnablePressed = false;
 
-//void renderQuad();
-
 unsigned int planeVAO;
 
 glm::vec3 lightPos(0.0f,18.5f,10.0f);
 
 glm::vec3 modelPosition [] = {
-        glm::vec3(0.0f, -0.5f, 20.0f),glm::vec3(30.0f, -0.5f, 40.0f), glm::vec3(30.0f, -0.5f, 0.0f),
-        glm::vec3(0.0f, -0.5f, 30.0f), glm::vec3(14.0f, -0.4f, 10.0f),glm::vec3(-1.0f, 0.0f, 20.0f),glm::vec3(30.0f, 5.3f, 16.0f),
-        glm::vec3(-14.0f, -0.5f, 34.0f)
+        glm::vec3(-20.0f, -0.5f, 35.0f),glm::vec3(23.0f, -0.5f, 20.0f), glm::vec3(5.0f, -0.5f, 0.0f),
+        glm::vec3(13.0f, -0.5f, 27.0f), glm::vec3(10.0f, -0.4f, 15.0f),glm::vec3(-3.0f, -1.0f, 13.0f)
 };
 
 int main()
@@ -80,39 +77,17 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
     // shaders
-    Shader depthShader("resources/shaders/3.2.1.point_shadows_depth.vs","resources/shaders/3.2.1.point_shadows_depth.fs","resources/shaders/3.2.1.point_shadows_depth.gs");
+    Shader depthShader("resources/shaders/shadows_depth.vs","resources/shaders/shadows_depth.fs","resources/shaders/shadows_depth.gs");
     Shader forModel("resources/shaders/model_loading.vs", "resources/shaders/model_loading.fs");
     Shader skyBoxShader("resources/shaders/skybox.vs","resources/shaders/skybox.fs");
-    Shader depthDebug("resources/shaders/debug.vs","resources/shaders/debug.fs");
     Shader lightShader("resources/shaders/light.vs","resources/shaders/light.fs");
 
-    // objects
     Model pyramids("resources/objects/pyramids/pyramids.obj");
     Model temple1("resources/objects/temple1/temple1.obj");
     Model temple2("resources/objects/temple2/temple2.obj");
     Model temple3("resources/objects/temple3/temple3.obj");
     Model obelisk("resources/objects/ObeliskPiramide/Obelisk+mini pyramids.obj");
-    Model palma1("resources/objects/Hoewa_Forsteriana_OBJ/hoewa_Forsteriana_1.obj");
-    Model palma2("resources/objects/Hoewa_Forsteriana_OBJ/hoewa_Forsteriana_2.obj");
-    Model kutija("resources/objects/TutBox/TutPaintedChest.obj");
-    Model mumija("resources/objects/mummy/mummy.obj");
-
-    // objects array
-    std::vector<Model*> objekti;
-    objekti.push_back(&pyramids);
-    objekti.push_back(&temple1);
-    objekti.push_back(&temple2);
-    objekti.push_back(&temple3);
-    objekti.push_back(&obelisk);
-    objekti.push_back(&mumija);
-    objekti.push_back(&kutija);
-    objekti.push_back(&palma1);
-    objekti.push_back(&palma2);
-
-//    for (Model* m : objekti) {
-//        m->SetShaderTextureNamePrefix("material.");
-//    }
-
+    Model palma("resources/objects/Hoewa_Forsteriana_OBJ/hoewa_Forsteriana_1.obj");
     // scene floor
     float planeVertices[] = {
             // positions            // normals                                  // texcoords
@@ -274,14 +249,8 @@ int main()
     forModel.setInt("material.diffuse_texture1", 0);
     forModel.setInt("depthMap", 1);
 
-    depthDebug.use();
-    depthDebug.setInt("depthMap", 0);
-
     skyBoxShader.use();
     skyBoxShader.setInt("skybox",0);
-
-//    glm::vec3 lightPos(40.0f, 40.0f, 11.0f);
-
 
     // petlja renderovanja
     while(!glfwWindowShouldClose(window))
@@ -324,7 +293,7 @@ int main()
                 depthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
             depthShader.setFloat("far_plane", far_plane);
             depthShader.setVec3("lightPos", lightPos);
-            renderScene(depthShader, objekti);
+            renderScene(depthShader, pyramids, temple1, temple2, temple3, obelisk, palma);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // reset viewport
@@ -348,7 +317,7 @@ int main()
         glBindTexture(GL_TEXTURE_2D, floorTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-        renderScene(forModel, objekti);
+        renderScene(forModel, pyramids, temple1, temple2, temple3, obelisk, palma);
 
         lightShader.use();
         lightShader.setMat4("projection", projection);
@@ -392,54 +361,55 @@ int main()
     return 0;
 }
 
-void renderScene(Shader& shader, std::vector<Model*> objekti) {
+void renderScene(Shader& shader, Model& pyramids, Model& temple1, Model& temple2, Model& temple3, Model& obelisk, Model& palma) {
     glm::mat4 model = glm::mat4(1.0f);
-    shader.setMat4("model", glm::scale(model,glm::vec3(5.0f,1.0f,5.0f)));
+    shader.setMat4("model", glm::scale(model,glm::vec3(4.0f,1.0f,4.0f)));
     glBindVertexArray(planeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    for (int i = 0; i<objekti.size()-4; i++) {
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, modelPosition[i]);
-        model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
-        shader.setMat4("model", model);
-        objekti[i]->Draw(shader);
-    }
+    // piramide
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, modelPosition[0]);
+    model = glm::scale(model, glm::vec3(0.8f, 0.8f, 0.8f));
+    shader.setMat4("model", model);
+    pyramids.Draw(shader);
 
-    // mumija
+    // temple1
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, modelPosition[1]);
+    model = glm::scale(model, glm::vec3(0.7f, 0.7f, 0.7f));
+    shader.setMat4("model", model);
+    temple1.Draw(shader);
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, modelPosition[2]);
+    shader.setMat4("model", model);
+    temple2.Draw(shader);
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, modelPosition[3]);
+    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f,1.0f,0.0f));
+    //model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
+    shader.setMat4("model", model);
+    temple3.Draw(shader);
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, modelPosition[4]);
+    model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
+    shader.setMat4("model", model);
+    obelisk.Draw(shader);
+
     model = glm::mat4(1.0f);
     model = glm::translate(model, modelPosition[5]);
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f,0.0f,1.0f));
-    model = glm::scale(model, glm::vec3(0.07f, 0.07f, 0.07f));
+    model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
     shader.setMat4("model", model);
-    objekti[5]->Draw(shader);
+    palma.Draw(shader);
 
-    // kutija
     model = glm::mat4(1.0f);
-    model = glm::translate(model, modelPosition[6]);
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
-    model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+    model = glm::translate(model, glm::vec3(modelPosition[5].x + 5.0f, modelPosition[5].y, modelPosition[5].z));
+    model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
     shader.setMat4("model", model);
-    objekti[6]->Draw(shader);
-
-    for (unsigned int i = 0; i<10; i++) {
-        model = glm::mat4(1.0f);
-        model = glm::translate(model,  glm::vec3(modelPosition[7].x, modelPosition[7].y, modelPosition[7].z - i*4.0f));
-        model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
-        shader.setMat4("model", model);
-        if (i % 2 == 0) objekti[objekti.size()-2]->Draw(shader);
-        else objekti[objekti.size()-1]->Draw(shader);
-    }
-
-    for (unsigned int i = 0; i<5; i++) {
-        model = glm::mat4(1.0f);
-        model = glm::translate(model,  glm::vec3(modelPosition[7].x + 27.0f, modelPosition[7].y, modelPosition[7].z - i*4.0f));
-        model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
-        shader.setMat4("model", model);
-        if (i % 2 == 0) objekti[objekti.size()-2]->Draw(shader);
-        else objekti[objekti.size()-1]->Draw(shader);
-    }
+    palma.Draw(shader);
 }
 
 void processInput(GLFWwindow *window) {
