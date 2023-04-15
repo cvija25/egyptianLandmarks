@@ -27,6 +27,7 @@ Camera camera(glm::vec3(15.0f, 10.0f, 35.0f));
 float lastX = (float)SCR_WIDTH  / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
+bool shadows = true;
 
 // timing
 float deltaTime = 0.0f;
@@ -38,6 +39,8 @@ bool mouseEnablePressed = false;
 //void renderQuad();
 
 unsigned int planeVAO;
+
+glm::vec3 lightPos(0.0f,18.5f,10.0f);
 
 glm::vec3 modelPosition [] = {
         glm::vec3(0.0f, -0.5f, 20.0f),glm::vec3(30.0f, -0.5f, 40.0f), glm::vec3(30.0f, -0.5f, 0.0f),
@@ -77,10 +80,11 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
     // shaders
-    Shader depthShader("resources/shaders/shadow_mapping_depth.vs","resources/shaders/shadow_mapping_depth.fs");
+    Shader depthShader("resources/shaders/3.2.1.point_shadows_depth.vs","resources/shaders/3.2.1.point_shadows_depth.fs","resources/shaders/3.2.1.point_shadows_depth.gs");
     Shader forModel("resources/shaders/model_loading.vs", "resources/shaders/model_loading.fs");
     Shader skyBoxShader("resources/shaders/skybox.vs","resources/shaders/skybox.fs");
     Shader depthDebug("resources/shaders/debug.vs","resources/shaders/debug.fs");
+    Shader lightShader("resources/shaders/light.vs","resources/shaders/light.fs");
 
     // objects
     Model pyramids("resources/objects/pyramids/pyramids.obj");
@@ -146,7 +150,6 @@ int main()
             1.0f, -1.0f, -1.0f,
             1.0f,  1.0f, -1.0f,
             -1.0f,  1.0f, -1.0f,
-
             -1.0f, -1.0f,  1.0f,
             -1.0f, -1.0f, -1.0f,
             -1.0f,  1.0f, -1.0f,
@@ -188,7 +191,7 @@ int main()
     glGenBuffers(1, &skyboxVBO);
     glBindVertexArray(skyboxVAO);
     glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
@@ -204,26 +207,64 @@ int main()
     stbi_set_flip_vertically_on_load(false);
     unsigned int cubemapTexture = loadCubemap(faces);
 
+    float lightVertices[] = {
+            -1.0f,0.0f,0.0f,        // 0
+            0.0f,-1.0f,0.0f,        // 1
+            1.0f,0.0f,0.0f,         // 2
+
+            1.0f,0.0f,0.0f,      // 2
+            0.0f,1.0f,0.0f,     // 3
+            -1.0f,0.0f,0.0f,    // 0
+
+            -1.0f,0.0f,0.0f,    // 0
+            0.0f,-1.0f,0.0f,    // 1
+            0.0f,0.0f,1.0f,     // 4
+
+            0.0f,-1.0f,0.0f,    // 1
+            1.0f,0.0f,0.0f,     // 2
+            0.0f,0.0f,1.0f,     // 4
+
+            1.0f,0.0f,0.0f,     // 2
+            0.0f,1.0f,0.0f,     // 3
+            0.0f,0.0f,1.0f,     // 4
+
+            0.0f,1.0f,0.0f,     // 3
+            -1.0f,0.0f,0.0f,    // 0
+            0.0f,0.0f,1.0f,     // 4
+
+
+    };
+
+    unsigned int lightVBO, lightVAO;
+    glGenBuffers(1, &lightVBO);
+    glGenVertexArrays(1, &lightVAO);
+
+    glBindVertexArray(lightVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(lightVertices), lightVertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
     // shadow mapping
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     unsigned int depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
 
-    // depth texture
-    unsigned int depthMap;
-    glGenTextures(1, &depthMap);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
+    unsigned int depthCubemap;
+    glGenTextures(1, &depthCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     // attach depth texture as FBO's depth buffer
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -231,7 +272,7 @@ int main()
     // postavaljanje uniforma
     forModel.use();
     forModel.setInt("material.diffuse_texture1", 0);
-    forModel.setInt("shadowMap", 1);
+    forModel.setInt("depthMap", 1);
 
     depthDebug.use();
     depthDebug.setInt("depthMap", 0);
@@ -239,7 +280,8 @@ int main()
     skyBoxShader.use();
     skyBoxShader.setInt("skybox",0);
 
-    glm::vec3 lightPos(40.0f, 40.0f, 11.0f);
+//    glm::vec3 lightPos(40.0f, 40.0f, 11.0f);
+
 
     // petlja renderovanja
     while(!glfwWindowShouldClose(window))
@@ -263,54 +305,41 @@ int main()
 
 
         // matrica projekcije i pogleda iz perspektive svetla
-        glm::mat4 lightProjection, lightView;
-        glm::mat4 lightSpaceMatrix;
-        float near_plane = 1.0f, far_plane = 120.0f;
-
-        lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
-        lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-        lightSpaceMatrix = lightProjection * lightView;
-
-        // renderujemo scenu iz perspekive direkcionog svetla i popunjavamo depth mapu
-        depthShader.use();
-        depthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+        float near_plane = 1.0f;
+        float far_plane  = 100.0f;
+        glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
+        std::vector<glm::mat4> shadowTransforms;
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
 
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-            glClear(GL_DEPTH_BUFFER_BIT);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, floorTexture);
+        glClear(GL_DEPTH_BUFFER_BIT);
+            depthShader.use();
+            for (unsigned int i = 0; i < 6; ++i)
+                depthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+            depthShader.setFloat("far_plane", far_plane);
+            depthShader.setVec3("lightPos", lightPos);
             renderScene(depthShader, objekti);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // reset viewport
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // debug depth map
-//        depthDebug.use();
-//        depthDebug.setFloat("near_plane", near_plane);
-//        depthDebug.setFloat("far_plane", far_plane);
-//        glActiveTexture(GL_TEXTURE0);
-//        glBindTexture(GL_TEXTURE_2D, depthMap);
-//        renderQuad();
-
         forModel.use();
-
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
         forModel.setMat4("projection", projection);
         forModel.setMat4("view", view);
 
-        // directional light
-//        forModel.setVec3("dirLight.direction", 6.0f, -4.0f, 0.0f);
-//        forModel.setVec3("dirLight.ambient", 0.3f, 0.3f, 0.3f);
-//        forModel.setVec3("dirLight.diffuse", 0.6f, 0.6f, 0.6f);
-//        forModel.setVec3("dirLight.specular", 0.7f, 0.7f, 0.7f);
-
         forModel.setVec3("viewPosition", camera.Position);
         forModel.setVec3("lightPos", lightPos);
-        forModel.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+        forModel.setInt("shadows", shadows); // enable/disable shadows by pressing 'SPACE'
+        forModel.setFloat("far_plane", far_plane);
 
         forModel.setFloat("material.shininess", 64.0f);
 
@@ -318,8 +347,20 @@ int main()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
         renderScene(forModel, objekti);
+
+        lightShader.use();
+        lightShader.setMat4("projection", projection);
+        lightShader.setMat4("view", view);
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(3.0f));
+        lightShader.setMat4("model", model);
+        glBindVertexArray(lightVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 18);
 
         // na kraju crtamo skybox
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
@@ -401,36 +442,6 @@ void renderScene(Shader& shader, std::vector<Model*> objekti) {
     }
 }
 
-// used for debuging shadows
-//unsigned int quadVAO = 0;
-//unsigned int quadVBO;
-//void renderQuad()
-//{
-//    if (quadVAO == 0)
-//    {
-//        float quadVertices[] = {
-//                // positions        // texture Coords
-//                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-//                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-//                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-//                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-//        };
-//        // setup plane VAO
-//        glGenVertexArrays(1, &quadVAO);
-//        glGenBuffers(1, &quadVBO);
-//        glBindVertexArray(quadVAO);
-//        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-//        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-//        glEnableVertexAttribArray(0);
-//        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-//        glEnableVertexAttribArray(1);
-//        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-//    }
-//    glBindVertexArray(quadVAO);
-//    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-//    glBindVertexArray(0);
-//}
-
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -443,6 +454,15 @@ void processInput(GLFWwindow *window) {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+        lightPos.z -= 0.5f;
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+        lightPos.z += 0.5f;
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+        lightPos.x -= 0.5f;
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+        lightPos.x += 0.5f;
 
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mouseEnablePressed) {
         mouseEnable = !mouseEnable;
