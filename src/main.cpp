@@ -27,7 +27,6 @@ Camera camera(glm::vec3(15.0f, 10.0f, 35.0f));
 float lastX = (float)SCR_WIDTH  / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
-bool shadows = true;
 
 // timing
 float deltaTime = 0.0f;
@@ -38,7 +37,7 @@ bool mouseEnablePressed = false;
 
 unsigned int planeVAO;
 
-glm::vec3 lightPos(0.0f,18.5f,10.0f);
+glm::vec3 lightPos(-20.0f, 11.5f, 21.7f);
 
 glm::vec3 modelPosition [] = {
         glm::vec3(-20.0f, -0.5f, 35.0f),glm::vec3(23.0f, -0.5f, 20.0f), glm::vec3(5.0f, -0.5f, 0.0f),
@@ -75,12 +74,14 @@ int main()
     }
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 
     // shaders
     Shader depthShader("resources/shaders/shadows_depth.vs","resources/shaders/shadows_depth.fs","resources/shaders/shadows_depth.gs");
     Shader forModel("resources/shaders/model_loading.vs", "resources/shaders/model_loading.fs");
     Shader skyBoxShader("resources/shaders/skybox.vs","resources/shaders/skybox.fs");
     Shader lightShader("resources/shaders/light.vs","resources/shaders/light.fs");
+    Shader blendingShader("resources/shaders/blending.vs","resources/shaders/blending.fs");
 
     Model pyramids("resources/objects/pyramids/pyramids.obj");
     Model temple1("resources/objects/temple1/temple1.obj");
@@ -222,6 +223,32 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    float transparentVertices[] = {
+            // positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
+            0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+            0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+            0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+            1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+    };
+
+    unsigned int transparentVAO, transparentVBO;
+    glGenVertexArrays(1, &transparentVAO);
+    glGenBuffers(1, &transparentVBO);
+    glBindVertexArray(transparentVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, transparentVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), transparentVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
+    unsigned int transparentTexture = loadTexture("resources/textures/grafit.png");
+    unsigned int transparentTexture2 = loadTexture("resources/textures/grafit2.png");
+
     // shadow mapping
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     unsigned int depthMapFBO;
@@ -251,6 +278,9 @@ int main()
 
     skyBoxShader.use();
     skyBoxShader.setInt("skybox",0);
+
+    blendingShader.use();
+    blendingShader.setInt("texture1", 0);
 
     // petlja renderovanja
     while(!glfwWindowShouldClose(window))
@@ -307,7 +337,6 @@ int main()
 
         forModel.setVec3("viewPosition", camera.Position);
         forModel.setVec3("lightPos", lightPos);
-        forModel.setInt("shadows", shadows); // enable/disable shadows by pressing 'SPACE'
         forModel.setFloat("far_plane", far_plane);
 
         forModel.setFloat("material.shininess", 64.0f);
@@ -317,7 +346,11 @@ int main()
         glBindTexture(GL_TEXTURE_2D, floorTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+
         renderScene(forModel, pyramids, temple1, temple2, temple3, obelisk, palma);
+
+        // face cull nad svetlom
+        glCullFace(GL_FRONT);
 
         lightShader.use();
         lightShader.setMat4("projection", projection);
@@ -326,10 +359,36 @@ int main()
         model = glm::translate(model, lightPos);
         model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(3.0f));
+        model = glm::scale(model, glm::vec3(4.0f));
         lightShader.setMat4("model", model);
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 18);
+
+        glDisable(GL_CULL_FACE);
+
+        // crtamo hijeroglife na zidu
+        blendingShader.use();
+        glBindVertexArray(transparentVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, transparentTexture);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(21.4f,1.7f,-9.8f));
+        model = glm::scale(model, glm::vec3(3.0f));
+        blendingShader.setMat4("projection", projection);
+        blendingShader.setMat4("view", view);
+        blendingShader.setMat4("model", model);
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glBindTexture(GL_TEXTURE_2D, transparentTexture2);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(21.4f,4.7f,-9.8f));
+        model = glm::scale(model, glm::vec3(3.0f));
+        blendingShader.setMat4("projection", projection);
+        blendingShader.setMat4("view", view);
+        blendingShader.setMat4("model", model);
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // na kraju crtamo skybox
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
@@ -354,8 +413,10 @@ int main()
 
     glDeleteVertexArrays(1, &planeVAO);
     glDeleteVertexArrays(1, &skyboxVAO);
+    glDeleteVertexArrays(1, &transparentVAO);
     glDeleteBuffers(1, &planeVBO);
     glDeleteBuffers(1, &skyboxVBO);
+    glDeleteBuffers(1, &transparentVBO);
 
     glfwTerminate();
     return 0;
@@ -381,24 +442,27 @@ void renderScene(Shader& shader, Model& pyramids, Model& temple1, Model& temple2
     shader.setMat4("model", model);
     temple1.Draw(shader);
 
+    // temple2
     model = glm::mat4(1.0f);
     model = glm::translate(model, modelPosition[2]);
     shader.setMat4("model", model);
     temple2.Draw(shader);
 
+    // temple3
     model = glm::mat4(1.0f);
     model = glm::translate(model, modelPosition[3]);
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f,1.0f,0.0f));
-    //model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
     shader.setMat4("model", model);
     temple3.Draw(shader);
 
+    // obelisk i piramidice
     model = glm::mat4(1.0f);
     model = glm::translate(model, modelPosition[4]);
     model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
     shader.setMat4("model", model);
     obelisk.Draw(shader);
 
+    // palme
     model = glm::mat4(1.0f);
     model = glm::translate(model, modelPosition[5]);
     model = glm::scale(model, glm::vec3(0.04f, 0.04f, 0.04f));
@@ -425,14 +489,18 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
 
-    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)   // pomeranje svetla napred
         lightPos.z -= 0.5f;
-    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)   // pomeranje svetla nazad
         lightPos.z += 0.5f;
-    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)   // pomeranje svetla levo
         lightPos.x -= 0.5f;
-    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)   // pomeranje svetla desno
         lightPos.x += 0.5f;
+    if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)   // pomeranje svetla gore
+        lightPos.y += 0.5f;
+    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)   // pomeranje svetla dole
+        lightPos.y -= 0.5f;
 
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mouseEnablePressed) {
         mouseEnable = !mouseEnable;
