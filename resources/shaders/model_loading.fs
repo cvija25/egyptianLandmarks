@@ -14,12 +14,24 @@ struct Material {
     float shininess;
 };
 
+struct Light {
+    vec3 position;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
 uniform samplerCube depthMap;
 
 uniform Material material;
+uniform Light light;
 
 uniform vec3 viewPosition;
-uniform vec3 lightPos;
 
 uniform float far_plane;
 
@@ -33,7 +45,7 @@ vec3 gridSamplingDisk[20] = vec3[]
 );
 
 float ShadowCalculation(vec3 fragPos) {
-    vec3 fragToLight = fragPos - lightPos;
+    vec3 fragToLight = fragPos - light.position;
     float currentDepth = length(fragToLight);
     float shadow = 0.0;
     float bias = 0.15;
@@ -55,7 +67,6 @@ float ShadowCalculation(vec3 fragPos) {
 
 void main()
 {
-    vec3 lightColor = vec3(0.5);
     vec3 colorDI = texture(material.texture_diffuse1, fs_in.TexCoords).rgb;
     vec3 colorSP = texture(material.texture_specular1, fs_in.TexCoords).rgb;
 
@@ -63,19 +74,26 @@ void main()
 
     vec3 viewDir = normalize(viewPosition - fs_in.FragPos);
 
-    vec3 lightDir = normalize(lightPos - fs_in.FragPos);
+    vec3 lightDir = normalize(light.position - fs_in.FragPos);
 
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading blinn
     vec3 halfwayDir = normalize(lightDir + viewDir);
     float spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
 
-    vec3 ambient = 0.4 * colorDI;
-    vec3 diffuse = diff * lightColor;
-    vec3 specular = spec * lightColor;
+    vec3 ambient = light.ambient * colorDI;
+    vec3 diffuse = diff * light.diffuse * colorDI;
+    vec3 specular = spec * light.specular * colorSP;
+
+    float distance = length(light.position - fs_in.FragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
+    ambient  *= attenuation;
+    diffuse  *= attenuation;
+    specular *= attenuation;
 
     float shadow = ShadowCalculation(fs_in.FragPos);
-    vec3 lighting = ambient*vec3(colorDI) + (1.0 - shadow) * (diffuse*vec3(colorDI) + specular*vec3(colorSP));
+    vec3 lighting = ambient + (1.0 - shadow) * (diffuse + specular);
 
     FragColor = vec4(lighting, 1.0);
 }

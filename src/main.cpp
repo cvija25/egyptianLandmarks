@@ -20,8 +20,8 @@ unsigned int loadTexture(const char *path);
 unsigned int loadCubemap(vector<std::string> faces);
 void renderScene(Shader& shader, Model& pyramids, Model& temple1, Model& temple2, Model& temple3, Model& obelisk, Model& palma);
 
-const unsigned int SCR_WIDTH = 1600;
-const unsigned int SCR_HEIGHT = 900;
+unsigned int SCR_WIDTH = 1600;
+unsigned int SCR_HEIGHT = 900;
 
 Camera camera(glm::vec3(15.0f, 10.0f, 35.0f));
 float lastX = (float)SCR_WIDTH  / 2.0;
@@ -37,7 +37,12 @@ bool mouseEnablePressed = false;
 
 unsigned int planeVAO;
 
-glm::vec3 lightPos(-20.0f, 11.5f, 21.7f);
+struct Light {
+    glm::vec3 pos = glm::vec3(0.0f, 20.0f, 0.0f);
+    glm::vec3 color = glm::vec3(0.5f);
+};
+
+Light light;
 
 glm::vec3 modelPosition [] = {
         glm::vec3(-20.0f, -0.5f, 35.0f),glm::vec3(23.0f, -0.5f, 20.0f), glm::vec3(5.0f, -0.5f, 0.0f),
@@ -308,12 +313,12 @@ int main()
         float far_plane  = 100.0f;
         glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
         std::vector<glm::mat4> shadowTransforms;
-        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
-        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
-        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)));
-        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)));
-        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
-        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(light.pos, light.pos + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(light.pos, light.pos + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(light.pos, light.pos + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(light.pos, light.pos + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(light.pos, light.pos + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(light.pos, light.pos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
 
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -322,7 +327,7 @@ int main()
             for (unsigned int i = 0; i < 6; ++i)
                 depthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
             depthShader.setFloat("far_plane", far_plane);
-            depthShader.setVec3("lightPos", lightPos);
+            depthShader.setVec3("lightPos", light.pos);
             renderScene(depthShader, pyramids, temple1, temple2, temple3, obelisk, palma);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -336,7 +341,15 @@ int main()
         forModel.setMat4("view", view);
 
         forModel.setVec3("viewPosition", camera.Position);
-        forModel.setVec3("lightPos", lightPos);
+
+        forModel.setVec3("light.ambient", 0.4f, 0.4f, 0.4f);
+        forModel.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+        forModel.setVec3("light.specular", 0.9f, 0.9f, 0.9f);
+        forModel.setFloat("light.constant", 1.0f);
+        forModel.setFloat("light.linear", 0.0f);
+        forModel.setFloat("light.quadratic", 0.0f);
+
+        forModel.setVec3("light.position", light.pos);
         forModel.setFloat("far_plane", far_plane);
 
         forModel.setFloat("material.shininess", 64.0f);
@@ -356,7 +369,7 @@ int main()
         lightShader.setMat4("projection", projection);
         lightShader.setMat4("view", view);
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
+        model = glm::translate(model, light.pos);
         model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(4.0f));
@@ -490,17 +503,17 @@ void processInput(GLFWwindow *window) {
         camera.ProcessKeyboard(RIGHT, deltaTime);
 
     if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)   // pomeranje svetla napred
-        lightPos.z -= 0.5f;
+        light.pos.z -= 0.5f;
     if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)   // pomeranje svetla nazad
-        lightPos.z += 0.5f;
+        light.pos.z += 0.5f;
     if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)   // pomeranje svetla levo
-        lightPos.x -= 0.5f;
+        light.pos.x -= 0.5f;
     if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)   // pomeranje svetla desno
-        lightPos.x += 0.5f;
+        light.pos.x += 0.5f;
     if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)   // pomeranje svetla gore
-        lightPos.y += 0.5f;
+        light.pos.y += 0.5f;
     if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)   // pomeranje svetla dole
-        lightPos.y -= 0.5f;
+        light.pos.y -= 0.5f;
 
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mouseEnablePressed) {
         mouseEnable = !mouseEnable;
@@ -512,6 +525,8 @@ void processInput(GLFWwindow *window) {
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    SCR_WIDTH = width;
+    SCR_HEIGHT = height;
     glViewport(0, 0, width, height);
 }
 
