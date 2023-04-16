@@ -23,7 +23,7 @@ Y - gore
 
 H - dole
 
-Mozemo da primeteimo kako se senke pomeraju pomeranjem svetla. Jos neki dugmići koji su u funkciji jestu M kojim otkljucavamo mis i mozemo da pomerimo prozor ili uveličamo, ESC da zatvorimo prozor, WASD za pomeranje kamere i pomeranjem misa rotiramo istu, scroll na misu uveličava i smanjuje.
+Možemo da primetimo kako se senke pomeraju pomeranjem svetla. Jos neki dugmići koji su u funkciji jesu M kojim otkljucavamo miš i možemo da pomerimo prozor ili da ga uveličamo, ESC da zatvorimo prozor, WASD za pomeranje kamere, pomeranjem miša rotiramo istu, scroll na misu uveličava i smanjuje.
 
 Blending oblast je pokrivena koristeći discard metodu pri lepljenju hijeroglifa (transparentnih tekstura) na zid jednog od modela.
 Face Culling je primenjen na svetlu.
